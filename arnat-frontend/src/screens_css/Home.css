@@ -1,0 +1,209 @@
+/* src/screens_css/Home.css */
+
+/* Mobile Frame Wrapper */
+.home-screen-wrapper {
+  min-height: 100vh;
+  background-image: url('/bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+}
+
+.home-mobile-container {
+  width: 100%;
+  max-width: 430px;
+  background-color: #f4f9f5;
+  background-image: url('/bg.jpg');
+  background-size: 100% auto;
+  background-position: top center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-bottom: 2rem;
+}
+
+/* Header & KU Logo */
+.home-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background-color: #ffffff;
+  padding: 0.625rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f3f4f6;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.ku-badge {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  background-color: #154c2e;
+  border: 2px solid #c5a059;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.75rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Custom Buttons on Banner */
+.btn-banner-green {
+  background-color: #154c2e;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.625rem 1rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.btn-banner-green:hover {
+  background-color: #0f3a22;
+  transform: translateY(-1px);
+}
+
+.btn-banner-yellow {
+  background-color: #f59e0b;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.625rem 1rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.btn-banner-yellow:hover {
+  background-color: #d97706;
+  transform: translateY(-1px);
+}
+
+/* Cards & Interactions */
+.home-card-hover {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.home-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.1);
+}
+
+.home-card-img-zoom {
+  transition: transform 0.3s ease;
+}
+
+.home-card-hover:hover .home-card-img-zoom {
+  transform: scale(1.05);
+}
+
+/* Bottom Navigation */
+.home-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  max-width: 430px;
+  background-color: #154c2e;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0.625rem 0.25rem;
+  z-index: 30;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.nav-item-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: 11px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  border: none;
+  background: transparent;
+}
+
+.nav-item-btn.active {
+  color: #facc15;
+  font-weight: 600;
+}
+
+.nav-item-btn.inactive {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.nav-item-btn.inactive:hover {
+  color: #ffffff;
+}
+
+/* Smooth Slide-up Bottom Sheet & Overlay */
+@keyframes fadeInBackdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpSheet {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.menu-backdrop {
+  animation: fadeInBackdrop 0.22s ease-out forwards;
+}
+
+.menu-bottom-sheet {
+  animation: slideUpSheet 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform;
+}
+
+.menu-item-hover {
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.menu-item-hover:active {
+  transform: scale(0.97);
+}
+
+/* Smooth Slide-in from Right Side Drawer */
+@keyframes slideSideDrawer {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.menu-side-drawer {
+  animation: slideSideDrawer 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform;
+}
