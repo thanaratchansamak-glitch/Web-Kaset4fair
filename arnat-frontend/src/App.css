@@ -1,0 +1,16 @@
+/* src/App.css */
+.lux-app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  font-family: var(--font-main);
+  position: relative;
+}
+
+.lux-main-content {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}

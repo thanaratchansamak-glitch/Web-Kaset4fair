@@ -1,0 +1,354 @@
+/* src/pages/PaymentPage.css - Thanatooth Luxury Payment Screen */
+.payment-page-root {
+  min-height: 100vh;
+  background: #fbfbfd;
+  color: #1e293b;
+  padding: 40px 0 100px;
+  font-family: var(--font-body, "Plus Jakarta Sans", sans-serif);
+}
+
+.payment-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Breadcrumb */
+.payment-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 24px;
+}
+
+.payment-breadcrumb a {
+  color: #64748b;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.payment-breadcrumb a:hover {
+  color: #b8860b;
+}
+
+.payment-breadcrumb .crumb-sep {
+  color: #cbd5e1;
+  font-size: 11px;
+}
+
+.payment-breadcrumb .current {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* Header */
+.payment-header-bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 20px;
+  padding: 28px 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 30px -10px rgba(15, 23, 42, 0.05);
+}
+
+.payment-tag-gold {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: rgba(184, 134, 11, 0.08);
+  border: 1px solid rgba(184, 134, 11, 0.25);
+  border-radius: 999px;
+  color: #b8860b;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.payment-header-bar h1 {
+  font-family: var(--font-display, "Sora", sans-serif);
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 6px 0 2px;
+}
+
+.payment-header-bar p {
+  font-size: 14.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+.btn-back-reservations {
+  display: inline-flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-back-reservations:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+/* 2 Columns Grid */
+.payment-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* Card Box */
+.payment-card-box {
+  background: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 10px 35px -12px rgba(15, 23, 42, 0.05);
+}
+
+.payment-card-box h3 {
+  font-family: var(--font-display, "Sora", sans-serif);
+  font-size: 19px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px;
+}
+
+.box-subtitle {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0 0 24px;
+}
+
+/* QR Section */
+.qr-display-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 20px;
+  background: #fbfcfe;
+  border: 1.5px dashed rgba(184, 134, 11, 0.35);
+  border-radius: 18px;
+  margin-bottom: 24px;
+}
+
+.qr-code-img {
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+}
+
+.qr-amount-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.qr-amount-box .amt-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.qr-amount-box .amt-num {
+  font-family: var(--font-display, "Sora", sans-serif);
+  font-size: 28px;
+  font-weight: 800;
+  color: #b8860b;
+}
+
+.qr-account-info {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.acc-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13.5px;
+  color: #475569;
+}
+
+.acc-row strong {
+  color: #0f172a;
+}
+
+/* Upload Section */
+.upload-dropzone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 36px 20px;
+  text-align: center;
+  cursor: pointer;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.upload-dropzone:hover {
+  border-color: #b8860b;
+  background: #fffdf8;
+}
+
+.upload-icon-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(184, 134, 11, 0.1);
+  color: #b8860b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+}
+
+.upload-dropzone p {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px;
+}
+
+.upload-dropzone span {
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+.slip-preview-container {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.slip-preview-img {
+  width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #0f172a;
+}
+
+.btn-remove-slip {
+  background: #fee2e2;
+  border: none;
+  color: #dc2626;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  align-self: flex-end;
+  transition: background 0.2s ease;
+}
+
+.btn-remove-slip:hover {
+  background: #fecaca;
+}
+
+.btn-submit-slip-gold {
+  width: 100%;
+  height: 52px;
+  background: linear-gradient(135deg, #b8860b 0%, #d4af37 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 15.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(184, 134, 11, 0.35);
+  transition: all 0.25s ease;
+}
+
+.btn-submit-slip-gold:hover:not(:disabled) {
+  background: linear-gradient(135deg, #996515 0%, #c59b27 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(184, 134, 11, 0.45);
+}
+
+.btn-submit-slip-gold:disabled {
+  background: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Success Card */
+.slip-already-submitted-card {
+  text-align: center;
+  padding: 24px 20px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-badge-paid {
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-badge-review {
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: #fef3c7;
+  color: #b45309;
+}
+
+@media (max-width: 840px) {
+  .payment-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+

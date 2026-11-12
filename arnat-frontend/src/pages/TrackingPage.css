@@ -1,0 +1,410 @@
+/* src/pages/TrackingPage.css - Thanatooth Luxury Live Handover Tracking Screen */
+.tracking-page-root {
+  min-height: 100vh;
+  background: #fbfbfd;
+  color: #1e293b;
+  padding: 36px 0 100px;
+  font-family: var(--font-body, "Plus Jakarta Sans", sans-serif);
+}
+
+.tracking-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Breadcrumb */
+.tracking-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 24px;
+}
+
+.tracking-breadcrumb a {
+  color: #64748b;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.tracking-breadcrumb a:hover {
+  color: #b8860b;
+}
+
+.tracking-breadcrumb .crumb-sep {
+  color: #cbd5e1;
+  font-size: 11px;
+}
+
+.tracking-breadcrumb .current {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* Header */
+.tracking-header-bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 20px;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+  box-shadow: 0 8px 30px -10px rgba(15, 23, 42, 0.05);
+}
+
+.tracking-tag-gold {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(184, 134, 11, 0.08);
+  border: 1px solid rgba(184, 134, 11, 0.25);
+  border-radius: 999px;
+  color: #b8860b;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.tracking-header-bar h1 {
+  font-family: var(--font-display, "Sora", sans-serif);
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 6px 0 2px;
+}
+
+.tracking-header-bar p {
+  font-size: 14.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+.btn-tracking-back {
+  display: inline-flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-tracking-back:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+/* Top Vehicle Card Banner */
+.tracking-vehicle-banner {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.05);
+}
+
+.vehicle-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.vehicle-thumb-img {
+  width: 140px;
+  height: 90px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.vehicle-banner-info h3 {
+  font-family: var(--font-display, "Sora", sans-serif);
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px;
+}
+
+.vehicle-banner-info p {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+.vehicle-banner-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  text-align: right;
+}
+
+.eta-badge-box {
+  background: #fffdf8;
+  border: 1.5px solid rgba(184, 134, 11, 0.3);
+  border-radius: 12px;
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.eta-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #b8860b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.eta-time {
+  font-family: var(--font-display, "Sora", sans-serif);
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+/* Timeline Card */
+.tracking-timeline-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 36px 40px;
+  margin-bottom: 28px;
+  box-shadow: 0 10px 35px -12px rgba(15, 23, 42, 0.05);
+}
+
+.timeline-card-title {
+  font-family: var(--font-display, "Sora", sans-serif);
+  font-size: 19px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px;
+}
+
+.timeline-card-sub {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0 0 36px;
+}
+
+/* Horizontal Progress Stepper (Like Shopee Tracking) */
+.stepper-progress-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 48px;
+}
+
+.stepper-track-line {
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  right: 30px;
+  height: 4px;
+  background: #e2e8f0;
+  z-index: 1;
+}
+
+.stepper-track-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #b8860b 0%, #16a34a 100%);
+  transition: width 0.5s ease;
+}
+
+.stepper-node {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 120px;
+}
+
+.stepper-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: #64748b;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+}
+
+.stepper-node.active .stepper-circle {
+  border-color: #b8860b;
+  background: #b8860b;
+  color: #ffffff;
+  box-shadow: 0 0 0 5px rgba(184, 134, 11, 0.18);
+}
+
+.stepper-node.completed .stepper-circle {
+  border-color: #16a34a;
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.stepper-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.stepper-node.active .stepper-label,
+.stepper-node.completed .stepper-label {
+  color: #0f172a;
+}
+
+/* Vertical History Feed (Detailed Log Feed) */
+.history-feed-list {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border-left: 2px solid #e2e8f0;
+  margin-left: 20px;
+  padding-left: 24px;
+  gap: 28px;
+}
+
+.feed-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.feed-bullet {
+  position: absolute;
+  left: -32px;
+  top: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px #e2e8f0;
+}
+
+.feed-item.highlight .feed-bullet {
+  background: #b8860b;
+  box-shadow: 0 0 0 4px rgba(184, 134, 11, 0.25);
+}
+
+.feed-item.completed .feed-bullet {
+  background: #16a34a;
+}
+
+.feed-time {
+  font-size: 12px;
+  font-weight: 700;
+  color: #b8860b;
+}
+
+.feed-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.feed-desc {
+  font-size: 13.5px;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* 2-Column Bottom Info Grid */
+.tracking-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.tracking-info-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.05);
+}
+
+.tracking-info-box h4 {
+  font-family: var(--font-display, "Sora", sans-serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.info-lines-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-line-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13.5px;
+  color: #475569;
+}
+
+.info-line-row strong {
+  color: #0f172a;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+@media (max-width: 860px) {
+  .tracking-vehicle-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .vehicle-banner-right {
+    align-items: flex-start;
+    text-align: left;
+  }
+  .stepper-progress-bar {
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+  .stepper-node {
+    min-width: 90px;
+  }
+  .tracking-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

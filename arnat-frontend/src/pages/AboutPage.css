@@ -1,0 +1,440 @@
+/* src/pages/AboutPage.css - Ultra Luxury White & Champagne Gold Theme */
+.about-page-root {
+  color: #1e293b;
+  background: #ffffff;
+  min-height: 100vh;
+  padding: 40px 0 100px;
+}
+
+.about-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+/* ================= 1. HERO BANNER ================= */
+.about-hero-banner {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 30px 20px;
+  position: relative;
+}
+
+.about-tag-gold {
+  color: #b8860b;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.about-title {
+  font-family: var(--font-display);
+  font-size: 46px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 18px;
+  letter-spacing: -0.5px;
+}
+
+.about-subtitle {
+  font-size: 17px;
+  color: #475569;
+  max-width: 720px;
+  margin: 0 auto;
+  line-height: 1.8;
+  font-weight: 400;
+}
+
+/* ================= 2. HERITAGE & HISTORY SECTION ================= */
+.about-history-section {
+  display: grid;
+  grid-template-columns: 1.25fr 0.85fr;
+  gap: 50px;
+  align-items: center;
+  margin-bottom: 80px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 28px;
+  padding: 44px;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+}
+
+.section-sub-gold {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #b8860b;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.history-text-col h2 {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 800;
+  margin: 0 0 18px;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.history-text-col p {
+  font-size: 15.5px;
+  line-height: 1.8;
+  color: #475569;
+  margin-bottom: 16px;
+}
+
+.stats-three-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 20px 14px;
+  text-align: center;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  border-color: #b8860b;
+}
+
+.stat-card strong {
+  display: block;
+  font-size: 30px;
+  font-weight: 800;
+  color: #b8860b;
+  margin-bottom: 4px;
+}
+
+.stat-card span {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* VIP Badge Card with Official Logo */
+.history-graphic-col {
+  display: flex;
+  justify-content: center;
+}
+
+.vip-badge-card {
+  background: #ffffff;
+  border: 1.5px solid rgba(184, 134, 11, 0.35);
+  border-radius: 30px;
+  padding: 38px 28px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 0 25px rgba(184, 134, 11, 0.08);
+  max-width: 420px;
+  width: 100%;
+}
+
+.about-official-logo-wrap {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #b8860b;
+  box-shadow: 0 4px 25px rgba(184, 134, 11, 0.35);
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-official-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.vip-badge-card h3 {
+  font-family: var(--font-display);
+  font-size: 23px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 1.5px;
+  margin: 0 0 8px;
+}
+
+.vip-badge-tagline {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #b8860b;
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.vip-badge-desc {
+  font-size: 15px;
+  color: #475569;
+  line-height: 1.75;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ================= 3. RENTAL TERMS & POLICIES ================= */
+.about-terms-section {
+  margin-bottom: 80px;
+}
+
+.terms-header-center {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.terms-header-center h2 {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 8px 0 10px;
+}
+
+.terms-header-center p {
+  font-size: 16px;
+  color: #64748b;
+}
+
+.terms-grid-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.term-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  padding: 32px 28px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.term-card:hover {
+  border-color: #b8860b;
+  transform: translateY(-3px);
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.08);
+}
+
+.term-icon {
+  font-size: 32px;
+  margin-bottom: 14px;
+}
+
+.term-card h3 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 16px;
+}
+
+.term-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.term-card li {
+  font-size: 14.5px;
+  color: #475569;
+  line-height: 1.65;
+  position: relative;
+  padding-left: 20px;
+}
+
+.term-card li::before {
+  content: "•";
+  color: #b8860b;
+  font-size: 20px;
+  position: absolute;
+  left: 0;
+  top: -2px;
+}
+
+/* ================= 4. LOCATIONS & CONTACT FORM ================= */
+.about-contact-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 28px;
+  padding: 44px;
+}
+
+.locations-col h2,
+.contact-form-col h3 {
+  font-family: var(--font-display);
+  color: #0f172a;
+  margin: 8px 0 12px;
+}
+
+.locations-col p {
+  color: #475569;
+  font-size: 15px;
+  margin-bottom: 24px;
+}
+
+.locations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.loc-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 22px;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.loc-card:hover {
+  border-color: #b8860b;
+  transform: translateX(4px);
+}
+
+.loc-badge {
+  display: inline-block;
+  background: #fefce8;
+  border: 1px solid #fef08a;
+  color: #854d0e;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.loc-card h4 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.loc-card p {
+  font-size: 14px;
+  color: #475569;
+  margin: 0 0 6px;
+}
+
+.loc-time {
+  font-size: 13px;
+  color: #b8860b;
+  font-weight: 600;
+}
+
+/* Contact Card Box */
+.contact-card-box {
+  background: #ffffff;
+  border: 1.5px solid rgba(184, 134, 11, 0.35);
+  border-radius: 22px;
+  padding: 32px 28px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.contact-card-box h3 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 20px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.c-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.c-form-group label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.c-form-group input,
+.c-form-group select,
+.c-form-group textarea {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #0f172a;
+  font-size: 14.5px;
+  font-family: inherit;
+  transition: all 0.25s ease;
+}
+
+.c-form-group input:focus,
+.c-form-group select:focus,
+.c-form-group textarea:focus {
+  outline: none;
+  border-color: #b8860b;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.15);
+}
+
+.btn-submit-contact-gold {
+  background: linear-gradient(135deg, #b8860b 0%, #d4af37 60%, #996515 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 24px;
+  font-size: 15.5px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(184, 134, 11, 0.35);
+  transition: all 0.3s ease;
+  margin-top: 8px;
+}
+
+.btn-submit-contact-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(184, 134, 11, 0.55);
+  background: linear-gradient(135deg, #996515 0%, #c59b27 60%, #854d0e 100%);
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .about-history-section {
+    grid-template-columns: 1fr;
+    padding: 30px 20px;
+  }
+  .terms-grid-cards {
+    grid-template-columns: 1fr;
+  }
+  .about-contact-section {
+    grid-template-columns: 1fr;
+    padding: 30px 20px;
+  }
+  .stats-three-grid {
+    grid-template-columns: 1fr;
+  }
+}

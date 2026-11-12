@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Gold Gradients -->
+    <linearGradient id="goldRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff4cc" />
+      <stop offset="25%" stop-color="#d4af37" />
+      <stop offset="50%" stop-color="#996515" />
+      <stop offset="75%" stop-color="#f3e5ab" />
+      <stop offset="100%" stop-color="#8a5a00" />
+    </linearGradient>
+
+    <linearGradient id="goldShine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d4af37" />
+      <stop offset="100%" stop-color="#8a5a00" />
+    </linearGradient>
+
+    <radialGradient id="luxDarkBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#141a29" />
+      <stop offset="60%" stop-color="#0b0e14" />
+      <stop offset="100%" stop-color="#05070a" />
+    </radialGradient>
+
+    <!-- Filter for subtle luxury drop shadow -->
+    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Outer Outer Gold Border -->
+  <circle cx="250" cy="250" r="240" fill="none" stroke="url(#goldRing)" stroke-width="8" />
+  
+  <!-- Outer Beaded Ring -->
+  <circle cx="250" cy="250" r="230" fill="none" stroke="#d4af37" stroke-width="2" stroke-dasharray="4,6" opacity="0.8" />
+  
+  <!-- Main Background Disc -->
+  <circle cx="250" cy="250" r="222" fill="url(#luxDarkBg)" />
+
+  <!-- Inner Gold Inscription Ring -->
+  <circle cx="250" cy="250" r="218" fill="none" stroke="url(#goldRing)" stroke-width="3" />
+  <circle cx="250" cy="250" r="162" fill="none" stroke="url(#goldRing)" stroke-width="2.5" />
+
+  <!-- Laurel Wreath Left -->
+  <g fill="url(#goldRing)" opacity="0.9">
+    <path d="M 125,250 C 120,200 145,150 180,120 C 170,135 165,160 168,185 C 160,175 145,170 140,185 C 148,205 152,225 154,245 Z" />
+    <path d="M 125,250 C 120,290 140,335 175,365 C 165,350 160,330 165,305 C 152,315 142,310 138,295 C 142,280 148,265 154,255 Z" />
+  </g>
+
+  <!-- Laurel Wreath Right -->
+  <g fill="url(#goldRing)" opacity="0.9">
+    <path d="M 375,250 C 380,200 355,150 320,120 C 330,135 335,160 332,185 C 340,175 355,170 360,185 C 352,205 348,225 346,245 Z" />
+    <path d="M 375,250 C 380,290 360,335 325,365 C 335,350 340,330 335,305 C 348,315 358,310 362,295 C 358,280 352,265 346,255 Z" />
+  </g>
+
+  <!-- Center Crown / Monogram Motif -->
+  <g transform="translate(250, 195) scale(0.95)">
+    <!-- Crown -->
+    <path d="M -50,-50 L -30,-20 L 0,-60 L 30,-20 L 50,-50 L 40, -10 L -40, -10 Z" fill="url(#goldRing)" filter="url(#goldGlow)" />
+    <!-- Center Luxury Shield -->
+    <path d="M -75,0 C -75,60 0,105 0,105 C 0,105 75,60 75,0 L 60,-5 L -60,-5 Z" fill="#0d131f" stroke="url(#goldRing)" stroke-width="4" />
+    <!-- Monogram 'T' (Thanatooth) inside shield -->
+    <path d="M -42,20 L 42,20 L 42,32 L 9,32 L 9,78 L -9,78 L -9,32 L -42,32 Z" fill="url(#goldRing)" filter="url(#goldGlow)" />
+    <!-- Luxury Star Under Shield -->
+    <polygon points="0,118 6,132 20,132 9,141 13,155 0,146 -13,155 -9,141 -20,132 -6,132" fill="url(#goldRing)" />
+  </g>
+
+  <!-- Brand Typography -->
+  <!-- Top: THANATOOTH -->
+  <text x="250" y="350" font-family="'Cinzel', 'Playfair Display', 'Trajan Pro', 'Georgia', serif" font-size="34" font-weight="900" fill="url(#goldRing)" text-anchor="middle" letter-spacing="7" filter="url(#goldGlow)">
+    THANATOOTH
+  </text>
+
+  <!-- Bottom: LUXURY AUTO -->
+  <text x="250" y="380" font-family="'Montserrat', 'Arial', sans-serif" font-size="14" font-weight="700" fill="#e2c875" text-anchor="middle" letter-spacing="10">
+    LUXURY AUTO
+  </text>
+
+  <!-- 5 Gold Stars at the bottom -->
+  <g transform="translate(250, 410)" fill="url(#goldRing)">
+    <polygon points="0,-6 2,-1 7,-1 3,2 4,7 0,4 -4,7 -3,2 -7,-1 -2,-1" transform="translate(0, 0) scale(1.3)" />
+    <polygon points="0,-6 2,-1 7,-1 3,2 4,7 0,4 -4,7 -3,2 -7,-1 -2,-1" transform="translate(-24, 0) scale(1.1)" />
+    <polygon points="0,-6 2,-1 7,-1 3,2 4,7 0,4 -4,7 -3,2 -7,-1 -2,-1" transform="translate(24, 0) scale(1.1)" />
+    <polygon points="0,-6 2,-1 7,-1 3,2 4,7 0,4 -4,7 -3,2 -7,-1 -2,-1" transform="translate(-46, 0) scale(0.9)" />
+    <polygon points="0,-6 2,-1 7,-1 3,2 4,7 0,4 -4,7 -3,2 -7,-1 -2,-1" transform="translate(46, 0) scale(0.9)" />
+  </g>
+</svg>
