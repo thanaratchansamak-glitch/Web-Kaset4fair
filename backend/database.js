@@ -134,9 +134,9 @@ db.serialize(() => {
 
       insertNews.run(
         'เตรียมพบกับ งานเกษตรแฟร์ ประจำปี 2569',
-        'Get Ready for Kaset Fair 2026',
+        'Get Ready for KASET 4 FAIR 2026',
         'มหาวิทยาลัยเกษตรศาสตร์ขอเชิญชวนเที่ยวชมงานเกษตรแฟร์ ประจำปี 2569 พบกับนวัตกรรมเกษตรยั่งยืน ร้านค้าผลิตภัณฑ์ชุมชน และกิจกรรมมากมายตลอด 9 วันเต็ม',
-        'Kasetsart University invites everyone to Kaset Fair 2026 featuring sustainable agri-innovations, community shops, and 9 days of activities.',
+        'Kasetsart University invites everyone to KASET 4 FAIR 2026 featuring sustainable agri-innovations, community shops, and 9 days of activities.',
         '27 พ.ย. 2569',
         'กองเกษตรสัมพันธ์',
         'https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=400&q=80'

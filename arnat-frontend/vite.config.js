@@ -8,8 +8,13 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('error', (err, req, res) => {
+            // เมื่อ backend ยังไม่เปิดรัน จะไม่แสดง error สีแดงรก terminal
+          });
+        }
       }
     }
   }
