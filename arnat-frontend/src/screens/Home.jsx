@@ -4,6 +4,7 @@ import {
   Search,
   MapPin,
   ChevronRight,
+  ChevronDown,
   Sprout,
   Video,
   Leaf,
@@ -16,7 +17,10 @@ import {
   Menu as MenuIcon,
   X,
   Monitor,
-  Smartphone
+  Smartphone,
+  BookOpen,
+  Music,
+  ShoppingBag
 } from 'lucide-react';
 
 // รายการการ์ด 4 ใบสำหรับส่วนนิทรรศการและการประกวด
@@ -79,6 +83,7 @@ export default function Home() {
   const [lang, setLang] = useState('TH');
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activitiesModalOpen, setActivitiesModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('home');
   const [selectedItem, setSelectedItem] = useState(null);
@@ -154,7 +159,7 @@ export default function Home() {
 
           {/* เมนูกลางเฉพาะบนจอ PC ในโหมด Desktop (รองรับภาษา TH / EN) */}
           {viewMode === 'desktop' && (
-            <nav className="hidden md:flex items-center gap-1 lg:gap-1.5">
+            <nav className="hidden md:flex items-center gap-1.5 lg:gap-2">
               <button
                 onClick={() => { setActiveTab('home'); setSelectedItem(null); }}
                 className={`pc-nav-item ${activeTab === 'home' ? 'active' : ''}`}
@@ -168,35 +173,11 @@ export default function Home() {
                 {lang === 'TH' ? 'ร้านค้า' : 'Shop'}
               </button>
               <button
-                onClick={() => { setActiveTab('map'); setSelectedItem(null); }}
-                className={`pc-nav-item ${activeTab === 'map' ? 'active' : ''}`}
+                onClick={() => setActivitiesModalOpen(true)}
+                className={`pc-nav-item inline-flex items-center gap-1.5 ${['map', 'workshop', 'stage', 'transit'].includes(activeTab) || activitiesModalOpen ? 'active' : ''}`}
               >
-                {lang === 'TH' ? 'แผนที่การจัดงาน' : 'Event Map'}
-              </button>
-              <button
-                onClick={() => { setActiveTab('workshop'); setSelectedItem(null); }}
-                className={`pc-nav-item ${activeTab === 'workshop' ? 'active' : ''}`}
-              >
-                {lang === 'TH' ? 'อบรมวิชาชีพ' : 'Workshops'}
-              </button>
-              <a
-                href="#exhibitions"
-                onClick={() => { setActiveTab('home'); setSelectedItem(null); }}
-                className="pc-nav-item"
-              >
-                {lang === 'TH' ? 'นิทรรศการและการประกวด' : 'Exhibitions & Contests'}
-              </a>
-              <button
-                onClick={() => { setActiveTab('stage'); setSelectedItem(null); }}
-                className={`pc-nav-item ${activeTab === 'stage' ? 'active' : ''}`}
-              >
-                {lang === 'TH' ? 'การแสดงเวทีกลาง' : 'Main Stage'}
-              </button>
-              <button
-                onClick={() => { setActiveTab('transit'); setSelectedItem(null); }}
-                className={`pc-nav-item ${activeTab === 'transit' ? 'active' : ''}`}
-              >
-                {lang === 'TH' ? 'การเดินทาง' : 'Transportation'}
+                <span>{lang === 'TH' ? 'กิจกรรม' : 'Activities'}</span>
+                <ChevronDown size={14} className="shrink-0 opacity-75 mt-0.5" />
               </button>
             </nav>
           )}
@@ -368,6 +349,167 @@ export default function Home() {
           </div>
         )}
 
+        {/* Modal / Popup กิจกรรม (แสดงหน้าต่างลอยเมื่อกดแท็บ 'กิจกรรม') */}
+        {activitiesModalOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-xs p-4 animate-fade-in"
+            onClick={() => setActivitiesModalOpen(false)}
+          >
+            <div
+              className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-emerald-100 transform transition-all animate-scale-up"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="bg-linear-to-r from-[#154c2e] to-[#1e6b41] px-6 py-4.5 text-white flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-amber-300">
+                    <Calendar size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base md:text-lg leading-tight">
+                      {lang === 'TH' ? 'เมนูกิจกรรมเกษตร 4 แฟร์' : 'Event Activities & Info'}
+                    </h3>
+                    <p className="text-[11px] text-emerald-100/90">
+                      {lang === 'TH' ? 'เลือกหัวข้อกิจกรรมที่คุณสนใจเพื่อเข้าชม' : 'Select an activity to view details'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setActivitiesModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Modal Body: รวมข้อมูลส่วนที่เหลือ */}
+              <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[70vh] overflow-y-auto">
+                {/* 1. แผนที่การจัดงาน */}
+                <button
+                  onClick={() => {
+                    setActiveTab('map');
+                    setSelectedItem(null);
+                    setActivitiesModalOpen(false);
+                  }}
+                  className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-gray-100 bg-gray-50/70 hover:bg-emerald-50/70 hover:border-emerald-200 transition text-left cursor-pointer group"
+                >
+                  <div className="w-11 h-11 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                    <MapPin size={22} />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-xs sm:text-sm text-gray-800 group-hover:text-[#154c2e] transition">
+                      {lang === 'TH' ? 'แผนที่การจัดงาน' : 'Event Map'}
+                    </h4>
+                    <p className="text-[11px] text-gray-500 line-clamp-1">
+                      {lang === 'TH' ? 'ผังงาน จุดจอดรถ และอาคาร' : 'Campus map & parking'}
+                    </p>
+                  </div>
+                </button>
+
+                {/* 2. อบรมวิชาชีพ */}
+                <button
+                  onClick={() => {
+                    setActiveTab('workshop');
+                    setSelectedItem(null);
+                    setActivitiesModalOpen(false);
+                  }}
+                  className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-gray-100 bg-gray-50/70 hover:bg-emerald-50/70 hover:border-emerald-200 transition text-left cursor-pointer group"
+                >
+                  <div className="w-11 h-11 rounded-xl bg-emerald-100 text-[#154c2e] flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                    <BookOpen size={22} />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-xs sm:text-sm text-gray-800 group-hover:text-[#154c2e] transition">
+                      {lang === 'TH' ? 'อบรมวิชาชีพ' : 'Workshops'}
+                    </h4>
+                    <p className="text-[11px] text-gray-500 line-clamp-1">
+                      {lang === 'TH' ? 'หลักสูตรอบรมอาชีพระยะสั้น' : 'Short courses & training'}
+                    </p>
+                  </div>
+                </button>
+
+                {/* 3. นิทรรศการและการประกวด */}
+                <a
+                  href="#exhibitions"
+                  onClick={() => {
+                    setActiveTab('home');
+                    setSelectedItem(null);
+                    setActivitiesModalOpen(false);
+                  }}
+                  className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-gray-100 bg-gray-50/70 hover:bg-emerald-50/70 hover:border-emerald-200 transition text-left cursor-pointer group"
+                >
+                  <div className="w-11 h-11 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                    <Sprout size={22} />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-xs sm:text-sm text-gray-800 group-hover:text-[#154c2e] transition">
+                      {lang === 'TH' ? 'นิทรรศการและการประกวด' : 'Exhibitions & Contests'}
+                    </h4>
+                    <p className="text-[11px] text-gray-500 line-clamp-1">
+                      {lang === 'TH' ? 'การประกวดพืช สัตว์ นวัตกรรม' : 'Agricultural competitions'}
+                    </p>
+                  </div>
+                </a>
+
+                {/* 4. การแสดงเวทีกลาง */}
+                <button
+                  onClick={() => {
+                    setActiveTab('stage');
+                    setSelectedItem(null);
+                    setActivitiesModalOpen(false);
+                  }}
+                  className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-gray-100 bg-gray-50/70 hover:bg-emerald-50/70 hover:border-emerald-200 transition text-left cursor-pointer group"
+                >
+                  <div className="w-11 h-11 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                    <Music size={22} />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-xs sm:text-sm text-gray-800 group-hover:text-[#154c2e] transition">
+                      {lang === 'TH' ? 'การแสดงเวทีกลาง' : 'Main Stage'}
+                    </h4>
+                    <p className="text-[11px] text-gray-500 line-clamp-1">
+                      {lang === 'TH' ? 'คอนเสิร์ต ศิลปวัฒนธรรม' : 'Concerts & performances'}
+                    </p>
+                  </div>
+                </button>
+
+                {/* 5. การเดินทาง */}
+                <button
+                  onClick={() => {
+                    setActiveTab('transit');
+                    setSelectedItem(null);
+                    setActivitiesModalOpen(false);
+                  }}
+                  className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-gray-100 bg-gray-50/70 hover:bg-emerald-50/70 hover:border-emerald-200 transition text-left cursor-pointer group sm:col-span-2"
+                >
+                  <div className="w-11 h-11 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                    <Bus size={22} />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-xs sm:text-sm text-gray-800 group-hover:text-[#154c2e] transition">
+                      {lang === 'TH' ? 'การเดินทาง' : 'Transportation'}
+                    </h4>
+                    <p className="text-[11px] text-gray-500 line-clamp-1">
+                      {lang === 'TH' ? 'รถรับส่ง จุดจอดรถ และเส้นทางมางาน' : 'Shuttle bus, parking & routes'}
+                    </p>
+                  </div>
+                </button>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="bg-gray-50 px-6 py-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                <span>{lang === 'TH' ? 'เกษตร 4 แฟร์ มก. ฉกส.' : 'KU CSC Kaset 4 Fair'}</span>
+                <button
+                  onClick={() => setActivitiesModalOpen(false)}
+                  className="text-xs font-semibold text-[#154c2e] hover:underline cursor-pointer"
+                >
+                  {lang === 'TH' ? 'ปิดหน้าต่าง' : 'Close'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* =========================================================
             2. Hero Banner Section
             ========================================================= */}
@@ -400,17 +542,17 @@ export default function Home() {
             </div>
 
             {/* 2 ปุ่ม Action ใต้ฮีโร่ */}
-            <div className={`flex items-center gap-2 sm:gap-3 ${viewMode === 'desktop' ? 'md:gap-5' : 'gap-2'} w-full justify-center mt-4 sm:mt-5 ${viewMode === 'desktop' ? 'md:mt-8' : 'mt-4'} px-1`}>
+            <div className={`flex items-center gap-2 sm:gap-3 ${viewMode === 'desktop' ? 'md:gap-5' : 'gap-2.5'} w-full justify-center mt-4 sm:mt-5 ${viewMode === 'desktop' ? 'md:mt-8' : 'mt-4'} px-1`}>
               <a
                 href="#exhibitions"
-                className={`btn-banner-green whitespace-nowrap text-[11px] sm:text-xs ${viewMode === 'desktop' ? 'md:text-sm md:px-7 md:py-3' : 'px-3.5 py-2'} shrink-0`}
+                className={`btn-banner-green whitespace-nowrap text-[11px] sm:text-xs ${viewMode === 'desktop' ? 'md:text-sm md:px-7 md:py-3' : 'px-3.5 py-2.5'} shrink-0`}
               >
                 <span>{lang === 'TH' ? 'นิทรรศการและการประกวด' : 'Exhibitions & Contests'}</span>
                 <ChevronRight size={16} className="shrink-0" />
               </a>
               <button
                 onClick={() => setActiveTab('map')}
-                className={`btn-banner-yellow whitespace-nowrap text-[11px] sm:text-xs ${viewMode === 'desktop' ? 'md:text-sm md:px-7 md:py-3' : 'px-3.5 py-2'} shrink-0`}
+                className={`btn-banner-yellow whitespace-nowrap text-[11px] sm:text-xs ${viewMode === 'desktop' ? 'md:text-sm md:px-7 md:py-3' : 'px-3.5 py-2.5'} shrink-0 cursor-pointer`}
               >
                 <MapPin size={16} className="shrink-0" />
                 <span>{lang === 'TH' ? 'แผนที่การจัดงาน' : 'Event Map'}</span>
@@ -526,25 +668,6 @@ export default function Home() {
                         {lang === 'TH' ? selectedItem.description_th : selectedItem.description_en}
                       </p>
                     </div>
-                  </div>
-
-                  <div className="pt-3 flex gap-2 md:gap-3">
-                    <button
-                      onClick={() => setActiveTab('map')}
-                      className="flex-1 bg-[#e5b822] hover:bg-[#d4a817] text-white text-xs md:text-sm font-semibold py-2.5 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
-                    >
-                      <MapPin size={15} />
-                      <span>{lang === 'TH' ? 'ดูจุดจัดงานบนแผนที่' : 'View on Map'}</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setActiveTab('home');
-                        setSelectedItem(null);
-                      }}
-                      className="flex-1 bg-[#154c2e] hover:bg-[#0f3a22] text-white text-xs md:text-sm font-semibold py-2.5 rounded-xl transition cursor-pointer"
-                    >
-                      {lang === 'TH' ? 'กลับหน้าหลัก' : 'Back to Home'}
-                    </button>
                   </div>
                 </div>
               </div>
@@ -675,13 +798,13 @@ export default function Home() {
                       <div className="flex items-center gap-1.5 md:gap-2 mt-3 pt-2 border-t border-gray-50">
                         <button
                           onClick={() => alert(lang === 'TH' ? 'เปิดรับลงทะเบียน ณ จุดจัดงาน' : 'Registration at the venue')}
-                          className="flex-1 bg-[#154c2e] hover:bg-[#0f3a22] text-white text-[10px] md:text-xs font-semibold py-1.5 md:py-2 rounded-full text-center transition cursor-pointer shadow-2xs"
+                          className="flex-1 min-w-0 bg-[#154c2e] hover:bg-[#0f3a22] text-white text-[11px] sm:text-xs md:text-xs font-semibold py-1.5 md:py-2 px-1 rounded-full text-center transition cursor-pointer shadow-2xs whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center"
                         >
                           {lang === 'TH' ? 'ลงทะเบียน' : 'Register'}
                         </button>
                         <button
                           onClick={() => openDetailPage(EXHIBITION_CARDS[0])}
-                          className="flex-1 border border-[#c5a059] text-[#c5a059] hover:bg-amber-50 text-[10px] md:text-xs font-semibold py-1.5 md:py-2 rounded-full text-center transition cursor-pointer bg-white"
+                          className="flex-1 min-w-0 border border-[#c5a059] text-[#c5a059] hover:bg-amber-50 text-[11px] sm:text-xs md:text-xs font-semibold py-1.5 md:py-2 px-1 rounded-full text-center transition cursor-pointer bg-white whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center"
                         >
                           {lang === 'TH' ? 'รายละเอียด' : 'Details'}
                         </button>
@@ -723,13 +846,13 @@ export default function Home() {
                       <div className="flex items-center gap-1.5 md:gap-2 mt-3 pt-2 border-t border-gray-50">
                         <button
                           onClick={() => alert(lang === 'TH' ? 'เปิดรับลงทะเบียน ณ จุดจัดงาน' : 'Registration at the venue')}
-                          className="flex-1 bg-[#154c2e] hover:bg-[#0f3a22] text-white text-[10px] md:text-xs font-semibold py-1.5 md:py-2 rounded-full text-center transition cursor-pointer shadow-2xs"
+                          className="flex-1 min-w-0 bg-[#154c2e] hover:bg-[#0f3a22] text-white text-[11px] sm:text-xs md:text-xs font-semibold py-1.5 md:py-2 px-1 rounded-full text-center transition cursor-pointer shadow-2xs whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center"
                         >
                           {lang === 'TH' ? 'ลงทะเบียน' : 'Register'}
                         </button>
                         <button
                           onClick={() => openDetailPage(EXHIBITION_CARDS[1])}
-                          className="flex-1 border border-[#c5a059] text-[#c5a059] hover:bg-amber-50 text-[10px] md:text-xs font-semibold py-1.5 md:py-2 rounded-full text-center transition cursor-pointer bg-white"
+                          className="flex-1 min-w-0 border border-[#c5a059] text-[#c5a059] hover:bg-amber-50 text-[11px] sm:text-xs md:text-xs font-semibold py-1.5 md:py-2 px-1 rounded-full text-center transition cursor-pointer bg-white whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center"
                         >
                           {lang === 'TH' ? 'รายละเอียด' : 'Details'}
                         </button>
@@ -786,24 +909,24 @@ export default function Home() {
         {/* =========================================================
             4. Footer สีเขียวเข้ม มก.
             ========================================================= */}
-        <footer className={`bg-[#154c2e] text-white p-4 ${viewMode === 'desktop' ? 'md:px-8 md:py-7 mt-8 md:mt-12' : 'mt-6'}`}>
-          <div className="max-w-6xl mx-auto flex items-center gap-3.5 md:gap-5">
+        <footer className={`bg-[#154c2e] text-white ${viewMode === 'desktop' ? 'p-4 md:px-8 md:py-6 mt-8 md:mt-12' : 'p-3 sm:p-3.5 mt-5'}`}>
+          <div className="max-w-6xl mx-auto flex items-center gap-2.5 sm:gap-3 md:gap-5">
             <img
               src="/ku-logo.png"
               alt="KU Logo"
-              className="w-14 h-14 md:w-16 md:h-16 object-contain drop-shadow-md shrink-0"
+              className={`${viewMode === 'desktop' ? 'w-12 h-12 md:w-16 md:h-16' : 'w-10 h-10'} object-contain drop-shadow-md shrink-0`}
             />
-            <div className="flex-1 min-w-0 space-y-0.5 md:space-y-1">
-              <h4 className="text-sm md:text-base font-bold text-[#facc15] leading-tight">
+            <div className="flex-1 min-w-0 space-y-0.5">
+              <h4 className={`${viewMode === 'desktop' ? 'text-xs md:text-base' : 'text-[11.5px] sm:text-xs'} font-bold text-[#facc15] leading-tight`}>
                 {lang === 'TH' ? 'มหาวิทยาลัยเกษตรศาสตร์ วิทยาเขตเฉลิมพระเกียรติ จังหวัดสกลนคร' : 'Kasetsart University Chalermphrakiat Sakon Nakhon Province Campus'}
               </h4>
-              <p className="text-[10.5px] md:text-xs text-white/85 leading-snug">
+              <p className={`${viewMode === 'desktop' ? 'text-[9.5px] md:text-xs' : 'text-[9.5px]'} text-white/85 leading-snug`}>
                 {lang === 'TH' ? '59 หมู่ 1 ถนนวปรอ. 366 ตำบลเชียงเครือ อำเภอเมืองสกลนคร จังหวัดสกลนคร 47000' : '59 Moo 1, VPOR 366 Rd., Chiang Khruea, Mueang Sakon Nakhon, Sakon Nakhon 47000'}
               </p>
-              <p className="text-[10px] md:text-xs text-white/70">
+              <p className={`${viewMode === 'desktop' ? 'text-[9px] md:text-xs' : 'text-[9px]'} text-white/70`}>
                 {lang === 'TH' ? 'ติดต่อ: สำนักงานวิทยาเขต | 042-725-042, 061-028-7788' : 'Contact: Campus Office | 042-725-042, 061-028-7788'}
               </p>
-              <p className="text-[9px] md:text-[11px] text-white/50 pt-0.5">
+              <p className={`${viewMode === 'desktop' ? 'text-[8.5px] md:text-[11px]' : 'text-[8.5px]'} text-white/50 pt-0.5`}>
                 © Copyright Kasetsart University CSC | Kaset4fair
               </p>
             </div>

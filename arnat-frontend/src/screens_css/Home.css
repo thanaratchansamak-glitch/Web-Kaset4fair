@@ -230,7 +230,11 @@
     border: none;
     white-space: nowrap;
     text-decoration: none;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    gap: 0.35rem;
   }
 
   .pc-nav-item:hover {
