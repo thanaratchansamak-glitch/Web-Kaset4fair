@@ -1,16 +1,14 @@
 /* src/screens_css/Home.css */
 
-/* Mobile Frame Wrapper */
+/* Mobile Frame Wrapper (< 768px default) */
 .home-screen-wrapper {
   min-height: 100vh;
-  background-image: url('/bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  background-color: #e5ece7;
   display: flex;
   justify-content: center;
 }
 
+/* Default Mobile Container (< 768px) */
 .home-mobile-container {
   width: 100%;
   max-width: 430px;
@@ -27,36 +25,20 @@
   padding-bottom: 0;
 }
 
-/* Header & KU Logo */
+/* Header & KU Logo (Mobile base) */
 .home-header {
   position: sticky;
   top: 0;
-  z-index: 30;
+  z-index: 40;
   background-color: #ffffff;
-  padding: 0.625rem 1rem;
+  padding: 0.625rem 0.875rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #f3f4f6;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #eef2ef;
 }
 
-.ku-badge {
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 9999px;
-  background-color: #154c2e;
-  border: 2px solid #c5a059;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 0.75rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-/* Custom Buttons on Banner */
+/* Custom Buttons on Banner (Mobile) */
 .btn-banner-green {
   background-color: #154c2e;
   color: #ffffff;
@@ -70,6 +52,7 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease-in-out;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .btn-banner-green:hover {
@@ -90,6 +73,7 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease-in-out;
   cursor: pointer;
+  border: none;
 }
 
 .btn-banner-yellow:hover {
@@ -99,98 +83,21 @@
 
 /* Cards & Interactions */
 .home-card-hover {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 
 .home-card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.1);
 }
 
 .home-card-img-zoom {
-  transition: transform 0.3s ease;
+  transition: transform 0.35s ease;
 }
 
 .home-card-hover:hover .home-card-img-zoom {
   transform: scale(1.05);
-}
-
-/* Bottom Navigation */
-.home-bottom-nav {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  max-width: 430px;
-  background-color: #154c2e;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding: 0.625rem 0.25rem;
-  z-index: 30;
-  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.12);
-}
-
-.nav-item-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-  font-size: 11px;
-  cursor: pointer;
-  transition: color 0.15s ease;
-  border: none;
-  background: transparent;
-}
-
-.nav-item-btn.active {
-  color: #facc15;
-  font-weight: 600;
-}
-
-.nav-item-btn.inactive {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.nav-item-btn.inactive:hover {
-  color: #ffffff;
-}
-
-/* Smooth Slide-up Bottom Sheet & Overlay */
-@keyframes fadeInBackdrop {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUpSheet {
-  0% {
-    transform: translateY(100%);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-.menu-backdrop {
-  animation: fadeInBackdrop 0.22s ease-out forwards;
-}
-
-.menu-bottom-sheet {
-  animation: slideUpSheet 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: transform;
-}
-
-.menu-item-hover {
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.menu-item-hover:active {
-  transform: scale(0.97);
 }
 
 /* Smooth Slide-in from Right Side Drawer */
@@ -206,4 +113,272 @@
 .menu-side-drawer {
   animation: slideSideDrawer 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   will-change: transform;
+}
+
+@keyframes fadeInBackdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.menu-backdrop {
+  animation: fadeInBackdrop 0.22s ease-out forwards;
+}
+
+/* ========================================================
+   Floating PC Viewport Switcher (มุมล่างขวา ไม่บัง Header เด็ดขาด)
+   ======================================================== */
+.pc-floating-switcher {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .pc-floating-switcher {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 5px;
+    border-radius: 9999px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(21, 76, 46, 0.12);
+  }
+
+  .pc-switcher-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .pc-switcher-btn.active {
+    background-color: #154c2e;
+    color: #ffffff;
+    box-shadow: 0 3px 8px rgba(21, 76, 46, 0.35);
+  }
+
+  .pc-switcher-btn.inactive {
+    background: transparent;
+    color: #4b5563;
+  }
+
+  .pc-switcher-btn.inactive:hover {
+    color: #111827;
+    background-color: #f3f4f6;
+  }
+
+  /* 1. เมื่อสลับเป็นโหมด Desktop (เต็มจอ) */
+  .home-screen-wrapper.view-desktop {
+    background-color: #f4f9f5;
+    background-image: url('/bg.jpg');
+    background-size: cover;
+    background-position: top center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    padding: 0;
+    margin: 0;
+    width: 100vw;
+    min-height: 100vh;
+    display: block;
+  }
+
+  .home-mobile-container.view-desktop {
+    max-width: 100% !important;
+    width: 100% !important;
+    background-color: transparent;
+    background-image: none;
+    border-radius: 0;
+    box-shadow: none;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .home-header.view-desktop {
+    height: 72px;
+    padding: 0 3.5rem;
+    background-color: #ffffff;
+    border-bottom: 1px solid #eef2ef;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    width: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Navigation tab items */
+  .pc-nav-item {
+    position: relative;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #4b5563;
+    transition: color 0.15s ease;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .pc-nav-item:hover {
+    color: #154c2e;
+  }
+
+  .pc-nav-item.active {
+    color: #154c2e;
+    font-weight: 700;
+  }
+
+  .pc-nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0.9rem;
+    right: 0.9rem;
+    height: 3px;
+    background-color: #154c2e;
+    border-radius: 9999px;
+  }
+
+  /* Content area max width & padding บนคอมพิวเตอร์ */
+  .pc-content-wrapper {
+    width: 100%;
+    max-width: 1380px;
+    margin: 0 auto;
+    padding: 2.5rem 3rem 4rem 3rem;
+    position: relative;
+  }
+
+  /* Section Title underline accent bar */
+  .pc-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+
+  .pc-title-underline {
+    width: 52px;
+    height: 3.5px;
+    background-color: #c5a059;
+    border-radius: 9999px;
+    margin-top: 0.4rem;
+  }
+
+  /* 4 Exhibition Cards in 1 Row */
+  .pc-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .pc-card-box {
+    background-color: #ffffff;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    border: 1px solid #edf2ee;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .pc-card-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 28px -4px rgba(21, 76, 46, 0.14);
+  }
+
+  .pc-card-img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 217 / 141;
+    overflow: hidden;
+    background-color: #f3f4f6;
+  }
+
+  .pc-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .pc-card-box:hover .pc-card-img {
+    transform: scale(1.06);
+  }
+
+  .pc-card-icon-badge {
+    position: absolute;
+    bottom: 0.65rem;
+    left: 0.75rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 9999px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #154c2e;
+  }
+
+  .pc-card-title-bar {
+    padding: 1rem 0.85rem;
+    text-align: center;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 54px;
+  }
+
+  .pc-card-title-text {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.3;
+  }
+
+  /* 2. เมื่อผู้ใช้ PC สลับเป็นโหมดจำลองมือถือ (view-mobile) */
+  .home-screen-wrapper.view-mobile {
+    background-color: #1a241e;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+    padding: 2.5rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .home-mobile-container.view-mobile {
+    max-width: 430px !important;
+    width: 100% !important;
+    background-color: #f4f9f5;
+    background-image: url('/bg.jpg');
+    background-size: 100% auto;
+    background-position: top center;
+    background-repeat: no-repeat;
+    min-height: calc(100vh - 5rem);
+    border-radius: 2.25rem;
+    overflow: hidden;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 0 12px #111a14;
+  }
+
+  .home-header.view-mobile {
+    padding: 0.625rem 0.875rem;
+  }
 }
