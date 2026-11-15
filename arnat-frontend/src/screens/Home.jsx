@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../screens_css/Home.css';
+import { ALL_EVENTS, BANNER_EVENT } from '../data/eventsData';
 import {
   Search,
   MapPin,
@@ -20,64 +21,16 @@ import {
   Smartphone,
   BookOpen,
   Music,
-  ShoppingBag
+  ShoppingBag,
+  Phone,
+  Mail,
+  Globe,
+  Building,
+  GraduationCap
 } from 'lucide-react';
 
-// รายการการ์ด 4 ใบสำหรับส่วนนิทรรศการและการประกวด
-const EXHIBITION_CARDS = [
-  {
-    id: 1,
-    title_th: 'นิทรรศการเกษตรและนวัตกรรม',
-    title_en: 'Agri & Innovation Expo',
-    image_url: 'https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?auto=format&fit=crop&w=800&q=85',
-    icon: 'Sprout',
-    description_th: 'จัดแสดงผลงานวิจัยและนวัตกรรมทางการเกษตรอัจฉริยะ (Smart Farming) โดรนเพื่อการเกษตร และพันธุ์พืชปรับปรุงใหม่ คณะทรัพยากรธรรมชาติและอุตสาหกรรมเกษตร มก. ฉกส.',
-    description_en: 'Showcasing smart farming research, agricultural drones, and new crop varieties from Faculty of Natural Resources and Agro-Industry, KU CSC.',
-    location_info_th: 'อาคารบริหารและวิชาการรวม (อาคาร 1) และลานนิทรรศการกลาง มก. ฉกส.',
-    location_info_en: 'Administration & Academic Building (Bldg 1) & Central Plaza, KU CSC',
-    time_info_th: '09:00 - 20:00 น.',
-    time_info_en: '09:00 AM - 08:00 PM'
-  },
-  {
-    id: 2,
-    title_th: 'การประกวดโปสเตอร์และคลิป',
-    title_en: 'Poster & Video Contest',
-    image_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=85',
-    icon: 'Video',
-    description_th: 'การประกวดผลงานทางวิชาการ โปสเตอร์วิจัย และการประกวดคลิปสั้นสร้างสรรค์การเกษตรชิงรางวัลเกียรติยศ มหาวิทยาลัยเกษตรศาสตร์ วิทยาเขตเฉลิมพระเกียรติ จังหวัดสกลนคร',
-    description_en: 'Academic poster competitions and creative short agricultural video contests at KU CSC.',
-    location_info_th: 'อาคารเรียนรวม (อาคาร 7) มก. ฉกส.',
-    location_info_en: 'Lecture Hall Building (Bldg 7), KU CSC',
-    time_info_th: '08:30 - 18:00 น.',
-    time_info_en: '08:30 AM - 06:00 PM'
-  },
-  {
-    id: 3,
-    title_th: 'การประกวดพืชและสัตว์',
-    title_en: 'Plant & Animal Contest',
-    image_url: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=800&q=85',
-    icon: 'Leaf',
-    description_th: 'การประกวดพืชสวน พืชไร่ ผลไม้ และสัตว์เศรษฐกิจพันธุ์ดี เช่น โคเนื้อภูพาน โคนม ปลากัดสวยงาม และสัตว์เลี้ยงในเขตภาคอีสานตอนบน',
-    description_en: 'Horticultural crops, fruits, and economic livestock contests including Phuphan cattle, ornamental fish, and pets.',
-    location_info_th: 'โซนฟาร์มพืชและสัตว์ทดลอง มก. ฉกส.',
-    location_info_en: 'Experimental Farm & Livestock Zone, KU CSC',
-    time_info_th: '09:00 - 18:00 น.',
-    time_info_en: '09:00 AM - 06:00 PM'
-  },
-  {
-    id: 4,
-    title_th: 'นิทรรศการผลงานวิจัยและนวัตกรรม',
-    title_en: 'Research & Innovation Expo',
-    image_url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=85',
-    icon: 'Microscope',
-    description_th: 'นวัตกรรมทางวิทยาศาสตร์ การแพทย์ วิศวกรรมศาสตร์ เทคโนโลยีชีวภาพ และผลิตภัณฑ์ต้นแบบพร้อมต่อยอดสู่เชิงพาณิชย์ของ มก. สกลนคร',
-    description_en: 'Scientific innovations, engineering, biotechnology, and commercial-ready prototypes of KU CSC.',
-    location_info_th: 'ห้องปฏิบัติการวิทยาศาสตร์ อาคารปฏิบัติการ มก. ฉกส.',
-    location_info_en: 'Science Laboratories Building, KU CSC',
-    time_info_th: '10:00 - 19:00 น.',
-    time_info_en: '10:00 AM - 07:00 PM'
-  }
-];
+// รายการกิจกรรมทั้งหมด
+const EXHIBITION_CARDS = ALL_EVENTS;
 
 export default function Home() {
   const [lang, setLang] = useState('TH');
@@ -87,11 +40,49 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('home');
   const [selectedItem, setSelectedItem] = useState(null);
+// State เก็บข้อมูลที่ดึงมาจาก SQLite (มี Fallback เริ่มต้นจาก EXHIBITION_CARDS เผื่อเซิร์ฟเวอร์ยังไม่เปิด)
+const [cardsData, setCardsData] = useState(EXHIBITION_CARDS);
 
+// ดึงข้อมูลจาก Backend SQLite (รองรับทั้ง localhost และ IP ของเครื่องเมื่อเปิดจากมือถือ)
+useEffect(() => {
+  const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000/api/exhibitions'
+    : `http://${window.location.hostname}:5000/api/exhibitions`;
+
+  fetch(backendUrl)
+    .then((res) => {
+      if (!res.ok) throw new Error('Network response was not ok');
+      return res.json();
+    })
+    .then((data) => {
+      if (Array.isArray(data) && data.length > 0) {
+        console.log('✅ โหลดข้อมูลจาก SQLite สำเร็จ:', data);
+        setCardsData(data);
+      }
+    })
+    .catch((err) => {
+      console.warn('⚠️ ไม่สามารถเชื่อมต่อ Backend SQLite ได้ (จะใช้ข้อมูลสำรองในเว็บแทน):', err.message);
+    });
+}, []);
   // สถานะโหมดการแสดงผลบน PC: 'desktop' (เว็บใหญ่เต็มจอ) หรือ 'mobile' (จำลองมือถือ)
   const [viewMode, setViewMode] = useState('desktop');
 
-  // แท็บวันที่ของไฮไลต์กำหนดการประกวด (รองรับ 2 ภาษา)
+  // State สำหรับสไลด์เลื่อนรูปภาพนิทรรศการและการประกวดอัตโนมัติ
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+
+
+  // 4 ไฮไลต์หลักสำหรับแสดงในหน้าแรก (ไม่ให้รกเกินไป) ส่วนกิจกรรมทั้งหมดให้กดดูใน 'ข่าวทั้งหมด'
+  const highlightCards = cardsData.slice(0, 4);
+
+  // ตั้งเวลาเลื่อนรูปภาพไฮไลต์อัตโนมัติทุกๆ 3.5 วินาที
+  useEffect(() => {
+    if (highlightCards.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % highlightCards.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [highlightCards.length]);
   const dates = [
     { th: '25 ก.พ.', en: 'Feb 25' },
     { th: '26 ก.พ.', en: 'Feb 26' },
@@ -108,7 +99,7 @@ export default function Home() {
   };
 
   // กรองการ์ดตามคำค้นหา
-  const filteredCards = EXHIBITION_CARDS.filter((item) =>
+  const filteredCards = cardsData.filter((item) =>
     item.title_th.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.title_en.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -142,42 +133,67 @@ export default function Home() {
             1. Top Header Bar (Desktop & Mobile)
             ========================================================= */}
         <header className={`home-header view-${viewMode}`}>
-          {/* ฝั่งซ้าย: ตราสัญลักษณ์ มก. และข้อความมหาวิทยาลัยเกษตรศาสตร์ */}
+          {/* ฝั่งซ้าย: ตราสัญลักษณ์เกษตรแฟร์ นนทรีอีสาน และข้อความเกษตรแฟร์ นนทรีอีสาน */}
           <div
-            className="flex items-center gap-2 min-w-0 shrink-0 cursor-pointer"
+            className="flex items-center gap-2.5 min-w-0 shrink-0 cursor-pointer group"
             onClick={() => { setActiveTab('home'); setSelectedItem(null); }}
           >
-            <img
-              src="/ku-logo.png"
-              alt="มหาวิทยาลัยเกษตรศาสตร์"
-              className="w-9 h-9 md:w-10 md:h-10 object-contain drop-shadow-xs shrink-0"
-            />
-            <span className="text-[13px] sm:text-[14px] md:text-[15px] font-semibold text-[#1a5336] tracking-tight leading-none truncate">
-              {lang === 'TH' ? 'มหาวิทยาลัยเกษตรศาสตร์' : 'Kasetsart University'}
-            </span>
+            <div className="relative">
+              <img
+                src="/emblem-pure.png"
+                alt="เกษตรแฟร์ นนทรีอีสาน"
+                className="w-10 h-10 md:w-11 md:h-11 object-contain drop-shadow-sm shrink-0 group-hover:scale-105 transition-transform duration-200"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[14px] sm:text-[15px] md:text-[17px] font-extrabold tracking-tight leading-tight bg-gradient-to-r from-[#0d3820] via-[#154c2e] to-[#257345] bg-clip-text text-transparent drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] truncate">
+                {lang === 'TH' ? (
+                  <>เกษตรแฟร์ <span className="text-[#d97706] font-black">นนทรีอีสาน</span></>
+                ) : (
+                  <>Kaset Fair <span className="text-[#d97706] font-black">Nontri Isan</span></>
+                )}
+              </span>
+              <span className="text-[9px] sm:text-[10px] md:text-[11px] font-semibold text-[#154c2e]/70 tracking-wider uppercase">
+                {lang === 'TH' ? 'ครั้งที่ 20 มก. ฉกส.' : '20th KU CSC'}
+              </span>
+            </div>
           </div>
 
-          {/* เมนูกลางเฉพาะบนจอ PC ในโหมด Desktop (รองรับภาษา TH / EN) */}
+          {/* เมนูกลางเฉพาะบนจอ PC ในโหมด Desktop (สไตล์โมเดิร์นคลีนตามเว็บเกษตรกำแพงแสน) */}
           {viewMode === 'desktop' && (
-            <nav className="hidden md:flex items-center gap-1.5 lg:gap-2">
+            <nav className="hidden md:flex items-center gap-2 lg:gap-3">
               <button
                 onClick={() => { setActiveTab('home'); setSelectedItem(null); }}
                 className={`pc-nav-item ${activeTab === 'home' ? 'active' : ''}`}
               >
-                {lang === 'TH' ? 'หน้าหลัก' : 'Home'}
+                {lang === 'TH' ? 'หน้าแรก' : 'Home'}
+              </button>
+              <button
+                onClick={() => { setActiveTab('activities'); setSelectedItem(null); }}
+                className={`pc-nav-item ${activeTab === 'activities' ? 'active' : ''}`}
+              >
+                {lang === 'TH' ? 'กิจกรรม/นิทรรศการ' : 'Activities'}
+              </button>
+              <button
+                onClick={() => {
+                  const conf = cardsData.find(c => c.id === 4) || cardsData[cardsData.length - 1];
+                  openDetailPage(conf);
+                }}
+                className="pc-nav-item"
+              >
+                {lang === 'TH' ? 'ประชุมวิชาการ' : 'Conference'}
+              </button>
+              <button
+                onClick={() => { setActiveTab('map'); setSelectedItem(null); }}
+                className={`pc-nav-item ${activeTab === 'map' ? 'active' : ''}`}
+              >
+                {lang === 'TH' ? 'แผนที่' : 'Map'}
               </button>
               <button
                 onClick={() => { setActiveTab('shop'); setSelectedItem(null); }}
                 className={`pc-nav-item ${activeTab === 'shop' ? 'active' : ''}`}
               >
                 {lang === 'TH' ? 'ร้านค้า' : 'Shop'}
-              </button>
-              <button
-                onClick={() => setActivitiesModalOpen(true)}
-                className={`pc-nav-item inline-flex items-center gap-1.5 ${['map', 'workshop', 'stage', 'transit'].includes(activeTab) || activitiesModalOpen ? 'active' : ''}`}
-              >
-                <span>{lang === 'TH' ? 'กิจกรรม' : 'Activities'}</span>
-                <ChevronDown size={14} className="shrink-0 opacity-75 mt-0.5" />
               </button>
             </nav>
           )}
@@ -428,11 +444,10 @@ export default function Home() {
                   </div>
                 </button>
 
-                {/* 3. นิทรรศการและการประกวด */}
-                <a
-                  href="#exhibitions"
+                {/* 3. นิทรรศการและการประกวด (เปิดดูหน้ารวมกิจกรรมทั้งหมด) */}
+                <button
                   onClick={() => {
-                    setActiveTab('home');
+                    setActiveTab('activities');
                     setSelectedItem(null);
                     setActivitiesModalOpen(false);
                   }}
@@ -446,10 +461,10 @@ export default function Home() {
                       {lang === 'TH' ? 'นิทรรศการและการประกวด' : 'Exhibitions & Contests'}
                     </h4>
                     <p className="text-[11px] text-gray-500 line-clamp-1">
-                      {lang === 'TH' ? 'การประกวดพืช สัตว์ นวัตกรรม' : 'Agricultural competitions'}
+                      {lang === 'TH' ? 'กิจกรรม การประกวด และนิทรรศการทั้งหมด' : 'All competitions and exhibitions'}
                     </p>
                   </div>
-                </a>
+                </button>
 
                 {/* 4. การแสดงเวทีกลาง */}
                 <button
@@ -514,52 +529,39 @@ export default function Home() {
             2. Hero Banner Section
             ========================================================= */}
         {activeTab === 'home' && (
-          <section className={`pt-4 sm:pt-6 ${viewMode === 'desktop' ? 'md:pt-10' : 'md:pt-6'} pb-3 flex flex-col items-center px-4`}>
-            <div className={`flex items-center justify-center gap-3 sm:gap-4 ${viewMode === 'desktop' ? 'md:gap-7 md:max-w-2xl' : 'max-w-[360px]'} w-full`}>
-              {/* ตราสัญลักษณ์เกษตร 4 แฟร์ */}
-              <img
-                src="/emblem.png?v=2"
-                alt="KASET 4 FAIR Emblem"
-                className={`w-24 h-24 sm:w-28 sm:h-28 ${viewMode === 'desktop' ? 'md:w-44 md:h-44' : 'w-24 h-24'} object-contain shrink-0 mix-blend-multiply drop-shadow-sm`}
-              />
-
-              {/* ข้อความต้อนรับและชื่องาน */}
-              <div className="text-left">
-                <p className={`text-[#154c2e] font-semibold text-xs sm:text-sm ${viewMode === 'desktop' ? 'md:text-xl' : 'text-xs'} mb-0.5`}>
-                  {lang === 'TH' ? 'ขอเชิญเที่ยวงาน' : 'Welcome to'}
-                </p>
-                <h1 className={`text-2xl sm:text-3xl ${viewMode === 'desktop' ? 'md:text-5xl' : 'text-2xl'} font-extrabold text-[#154c2e] tracking-tight leading-tight`}>
-                  {lang === 'TH' ? (
-                    <>เกษตร <span className="text-[#f59e0b]">4</span> แฟร์</>
-                  ) : (
-                    <>KASET <span className="text-[#f59e0b]">4</span> FAIR</>
-                  )}
-                </h1>
-                <p className={`text-[#154c2e] font-bold text-xs sm:text-sm ${viewMode === 'desktop' ? 'md:text-xl md:mt-1.5' : 'text-xs'} mt-0.5`}>
-                  {lang === 'TH' ? 'มหาวิทยาลัยเกษตรศาสตร์' : 'Kasetsart University'}
-                </p>
-              </div>
+          <div className="flex flex-col items-center w-full">
+            {/* ส่วนแบนเนอร์ศิลปินและการแสดง: กดดูรายละเอียดได้เต็มตา ไม่ล้นขอบจอ */}
+            <div className={`w-full ${viewMode === 'desktop' ? 'max-w-6xl px-2 sm:px-4 pt-2 md:pt-4' : 'px-0 pt-0'}`}>
+              <section
+                onClick={() => openDetailPage(BANNER_EVENT)}
+                className="relative w-full overflow-hidden flex items-center justify-center bg-transparent cursor-pointer group"
+                title={lang === 'TH' ? 'คลิกเพื่อดูรายละเอียดศิลปินและกำหนดการทั้งหมด' : 'Click to view full artists lineup and schedules'}
+              >
+                <img
+                  src="/events/banner-bg.jpg"
+                  alt="แบนเนอร์ศิลปินและตารางการแสดง เกษตรแฟร์ นนทรีอีสาน"
+                  className="w-full h-auto max-h-[460px] object-contain block group-hover:scale-[1.01] transition-transform duration-300"
+                />
+                <span className="absolute bottom-2 right-2 bg-black/65 backdrop-blur-xs text-white text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-medium shadow-md opacity-90 group-hover:opacity-100 transition-opacity">
+                  {lang === 'TH' ? ' คลิกดูรายละเอียดศิลปิน & ตารางงาน' : ' Click to view details'}
+                </span>
+              </section>
             </div>
 
-            {/* 2 ปุ่ม Action ใต้ฮีโร่ */}
-            <div className={`flex items-center gap-2 sm:gap-3 ${viewMode === 'desktop' ? 'md:gap-5' : 'gap-2.5'} w-full justify-center mt-4 sm:mt-5 ${viewMode === 'desktop' ? 'md:mt-8' : 'mt-4'} px-1`}>
-              <a
-                href="#exhibitions"
-                className={`btn-banner-green whitespace-nowrap text-[11px] sm:text-xs ${viewMode === 'desktop' ? 'md:text-sm md:px-7 md:py-3' : 'px-3.5 py-2.5'} shrink-0`}
-              >
-                <span>{lang === 'TH' ? 'นิทรรศการและการประกวด' : 'Exhibitions & Contests'}</span>
-                <ChevronRight size={16} className="shrink-0" />
-              </a>
+            {/* ปุ่ม แผนที่การจัดงาน: อยู่ใต้แบนเนอร์ ไม่บังแบนเนอร์ศิลปิน */}
+            <div className={`w-full flex items-center justify-center my-3 sm:my-4 ${viewMode === 'desktop' ? 'md:my-5' : 'my-3'} px-4`}>
               <button
                 onClick={() => setActiveTab('map')}
-                className={`btn-banner-yellow whitespace-nowrap text-[11px] sm:text-xs ${viewMode === 'desktop' ? 'md:text-sm md:px-7 md:py-3' : 'px-3.5 py-2.5'} shrink-0 cursor-pointer`}
+                className={`btn-banner-yellow whitespace-nowrap text-[11px] sm:text-xs ${
+                  viewMode === 'desktop' ? 'md:text-sm md:px-8 md:py-3' : 'px-4 py-2.5'
+                } shrink-0 cursor-pointer shadow-md hover:scale-105 transition-transform duration-200`}
               >
                 <MapPin size={16} className="shrink-0" />
                 <span>{lang === 'TH' ? 'แผนที่การจัดงาน' : 'Event Map'}</span>
                 <ChevronRight size={16} className="shrink-0" />
               </button>
             </div>
-          </section>
+          </div>
         )}
 
         {/* =========================================================
@@ -580,14 +582,15 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => setActiveTab('home')}
-                  className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200"
+                  className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
                 >
-                  {lang === 'TH' ? '← หน้าหลัก' : '← Home'}
+                  <span>←</span>
+                  <span>{lang === 'TH' ? 'หน้าหลัก' : 'Home'}</span>
                 </button>
               </div>
 
               <div className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
-                <div className="relative overflow-auto max-h-[75vh] bg-emerald-950 flex items-center justify-center">
+                <div className="relative overflow-auto max-h-[75vh] bg-white flex items-center justify-center">
                   <img
                     src="/kaset-map.jpg"
                     alt="KASET 4 FAIR Map"
@@ -610,64 +613,282 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          ) : activeTab === 'activities' ? (
+            /* หน้ากิจกรรมทั้งหมด (เปิดจากแถบเมนู 3 ขีด หรือปุ่มกิจกรรม) */
+            <div className={`px-3 sm:px-4 py-4 md:py-6 ${viewMode === 'desktop' ? 'max-w-5xl' : 'max-w-md'} mx-auto space-y-5 animate-fade-in`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className={`text-lg ${viewMode === 'desktop' ? 'md:text-2xl' : 'text-lg'} font-bold text-[#154c2e]`}>
+                    {lang === 'TH' ? 'กิจกรรมและนิทรรศการทั้งหมด' : 'All Activities & Exhibitions'}
+                  </h2>
+                  <p className="text-[11px] md:text-xs text-gray-500">
+                    {lang === 'TH' ? 'รวมนิทรรศการ การประกวดแข่งขัน และกิจกรรมในงานเกษตรแฟร์' : 'All exhibitions, contests, and event activities'}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('home')}
+                  className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
+                >
+                  <span>←</span>
+                  <span>{lang === 'TH' ? 'หน้าหลัก' : 'Home'}</span>
+                </button>
+              </div>
+
+              {/* รายการกิจกรรมและการประกวดทั้งหมด */}
+              <div className={`grid grid-cols-1 ${viewMode === 'desktop' ? 'sm:grid-cols-2 md:grid-cols-3 gap-5' : 'gap-3.5'}`}>
+                {cardsData.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => openDetailPage(item)}
+                    className="bg-white rounded-2xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 border border-gray-100 flex flex-col cursor-pointer group hover:-translate-y-1"
+                  >
+                    <div className="relative aspect-[4/3] bg-gray-50 flex items-center justify-center overflow-hidden">
+                      <img
+                        src={item.image_url}
+                        alt={lang === 'TH' ? item.title_th : item.title_en}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <span className="absolute top-2.5 right-2.5 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
+                        {lang === 'TH' ? 'คลิกดูรายละเอียด' : 'View Details'}
+                      </span>
+                    </div>
+
+                    <div className="p-3.5 sm:p-4 flex flex-col flex-1 justify-between gap-3">
+                      <div>
+                        <h3 className="font-bold text-xs sm:text-sm text-gray-900 group-hover:text-[#154c2e] transition line-clamp-2 leading-snug">
+                          {lang === 'TH' ? item.title_th : item.title_en}
+                        </h3>
+                        <div className="mt-2 space-y-1 text-[11px] text-gray-500">
+                          <div className="flex items-center gap-1.5 line-clamp-1">
+                            <MapPin size={13} className="shrink-0 text-amber-600" />
+                            <span>{lang === 'TH' ? item.location_info_th : item.location_info_en}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 line-clamp-1">
+                            <Calendar size={13} className="shrink-0 text-amber-600" />
+                            <span>{lang === 'TH' ? item.time_info_th : item.time_info_en}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDetailPage(item);
+                        }}
+                        className="w-full bg-emerald-50 hover:bg-[#154c2e] text-[#154c2e] hover:text-white py-2 rounded-xl text-xs font-semibold transition border border-emerald-200 hover:border-[#154c2e] flex items-center justify-center gap-1"
+                      >
+                        <span>{lang === 'TH' ? 'อ่านรายละเอียดทั้งหมด' : 'Read Full Details'}</span>
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : activeTab === 'detail' && selectedItem ? (
-            /* หน้ารายละเอียดแบบเต็มหน้าจอ */
-            <div className={`px-4 py-6 ${viewMode === 'desktop' ? 'max-w-4xl' : 'max-w-md'} mx-auto space-y-4 animate-fade-in`}>
+            /* หน้ารายละเอียดแบบเต็มหน้าจอ (แสดงรูปเต็มใบ ไม่ตัดขอบ ไม่ทับข้อความ) */
+            <div className={`px-3 sm:px-4 py-4 md:py-6 ${viewMode === 'desktop' ? 'max-w-4xl' : 'max-w-md'} mx-auto space-y-4 animate-fade-in`}>
               <div className="flex items-center justify-between gap-2">
                 <button
                   onClick={() => {
                     setActiveTab('home');
                     setSelectedItem(null);
                   }}
-                  className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 shrink-0"
+                  className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 shrink-0 whitespace-nowrap inline-flex items-center gap-1"
                 >
-                  {lang === 'TH' ? '← หน้าหลัก' : '← Home'}
+                  <span>←</span>
+                  <span>{lang === 'TH' ? 'หน้าหลัก' : 'Home'}</span>
                 </button>
                 <span className="text-[11px] md:text-xs font-medium text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
                   {lang === 'TH' ? 'นิทรรศการและการประกวด' : 'Exhibition & Contest'}
                 </span>
               </div>
 
-              <div className={`bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 ${viewMode === 'desktop' ? 'md:grid md:grid-cols-2' : ''}`}>
-                <div className="h-56 md:h-full overflow-hidden bg-gray-100">
+              {/* การ์ดรายละเอียด: แสดงรูปภาพเต็มใบแท้จริง ไม่ครอบตัด และพื้นหลังขาวสะอาด ไร้แถบสีเข้ม */}
+              <div className="bg-white rounded-3xl overflow-hidden shadow-lg border border-gray-100 flex flex-col">
+                <div className="w-full bg-white p-0 sm:p-2 flex items-center justify-center min-h-[300px] max-h-[82vh]">
                   <img
                     src={selectedItem.image_url}
                     alt={lang === 'TH' ? selectedItem.title_th : selectedItem.title_en}
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto max-h-[80vh] object-contain"
                   />
                 </div>
 
-                <div className="p-5 md:p-7 space-y-4 flex flex-col justify-between">
-                  <div className="space-y-4">
-                    <h2 className="text-xl md:text-2xl font-bold text-[#154c2e] leading-snug">
-                      {lang === 'TH' ? selectedItem.title_th : selectedItem.title_en}
-                    </h2>
+                <div className="p-4 sm:p-6 md:p-7 space-y-4">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-[#154c2e] leading-snug">
+                    {lang === 'TH' ? selectedItem.title_th : selectedItem.title_en}
+                  </h2>
 
-                    <div className="space-y-2 bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-100 text-xs md:text-sm">
-                      <div className="flex items-start gap-2 text-[#154c2e]">
-                        <MapPin size={16} className="shrink-0 mt-0.5 text-amber-600" />
-                        <span>
-                          <strong>{lang === 'TH' ? 'สถานที่จัดงาน:' : 'Location:'}</strong>{' '}
-                          {lang === 'TH' ? selectedItem.location_info_th : selectedItem.location_info_en}
-                        </span>
-                      </div>
-                      <div className="flex items-start gap-2 text-[#154c2e]">
-                        <Calendar size={16} className="shrink-0 mt-0.5 text-amber-600" />
-                        <span>
-                          <strong>{lang === 'TH' ? 'เวลาเปิดเข้าชม:' : 'Time:'}</strong>{' '}
-                          {lang === 'TH' ? selectedItem.time_info_th : selectedItem.time_info_en}
-                        </span>
-                      </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-emerald-50/70 p-3 sm:p-4 rounded-2xl border border-emerald-100 text-xs sm:text-sm">
+                    <div className="flex items-start gap-2 text-[#154c2e]">
+                      <MapPin size={16} className="shrink-0 mt-0.5 text-amber-600" />
+                      <span>
+                        <strong>{lang === 'TH' ? 'สถานที่จัดงาน:' : 'Location:'}</strong>{' '}
+                        {lang === 'TH' ? selectedItem.location_info_th : selectedItem.location_info_en}
+                      </span>
                     </div>
+                    <div className="flex items-start gap-2 text-[#154c2e]">
+                      <Calendar size={16} className="shrink-0 mt-0.5 text-amber-600" />
+                      <span>
+                        <strong>{lang === 'TH' ? 'เวลาเปิดเข้าชม:' : 'Time:'}</strong>{' '}
+                        {lang === 'TH' ? selectedItem.time_info_th : selectedItem.time_info_en}
+                      </span>
+                    </div>
+                  </div>
 
-                    <div className="space-y-1.5">
-                      <h3 className="text-xs md:text-sm font-bold text-gray-800">
-                        {lang === 'TH' ? 'รายละเอียดกิจกรรม' : 'Event Details'}
-                      </h3>
-                      <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
-                        {lang === 'TH' ? selectedItem.description_th : selectedItem.description_en}
-                      </p>
+                  <div className="space-y-2 pt-1">
+                    <h3 className="text-xs sm:text-sm font-bold text-gray-800">
+                      {lang === 'TH' ? 'รายละเอียดกิจกรรม' : 'Event Details'}
+                    </h3>
+                    <div className="text-xs sm:text-sm text-gray-700 leading-relaxed whitespace-pre-line bg-gray-50/80 p-3.5 sm:p-5 rounded-2xl border border-gray-100">
+                      {lang === 'TH' ? selectedItem.description_th : selectedItem.description_en}
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : activeTab === 'more' ? (
+            /* หน้าข้อมูลเพิ่มเติม: ข้อมูลการติดต่อมหาวิทยาลัยเกษตรศาสตร์ วิทยาเขตเฉลิมพระเกียรติ จังหวัดสกลนคร */
+            <div className={`px-3 sm:px-4 py-4 md:py-6 ${viewMode === 'desktop' ? 'max-w-4xl' : 'max-w-md'} mx-auto space-y-4 animate-fade-in`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className={`text-lg ${viewMode === 'desktop' ? 'md:text-2xl' : 'text-lg'} font-bold text-[#154c2e]`}>
+                    {lang === 'TH' ? 'ข้อมูลการติดต่อมหาวิทยาลัย' : 'Contact Information'}
+                  </h2>
+                  <p className="text-[11px] md:text-xs text-gray-500">
+                    {lang === 'TH' ? 'มหาวิทยาลัยเกษตรศาสตร์ วิทยาเขตเฉลิมพระเกียรติ จังหวัดสกลนคร (มก.ฉกส.)' : 'Kasetsart University Chalermphrakiat Sakon Nakhon Province Campus'}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('home')}
+                  className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
+                >
+                  <span>←</span>
+                  <span>{lang === 'TH' ? 'หน้าหลัก' : 'Home'}</span>
+                </button>
+              </div>
+
+              {/* ข้อมูลที่อยู่และช่องทางหลัก */}
+              <div className="bg-white rounded-3xl p-5 shadow-xs border border-emerald-100 space-y-4">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-11 h-11 rounded-2xl bg-emerald-100 text-[#154c2e] flex items-center justify-center shrink-0">
+                    <Building size={22} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm sm:text-base text-[#154c2e]">
+                      {lang === 'TH' ? 'ที่ตั้งมหาวิทยาลัย' : 'Campus Address'}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 mt-1 leading-relaxed">
+                      59 หมู่ 1 ถนนวปรอ 366 (ทางหลวงหมายเลข 227) ตำบลเชียงเครือ อำเภอเมือง จังหวัดสกลนคร 47000
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  <a
+                    href="tel:0610287788"
+                    className="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50/80 hover:bg-emerald-100 transition border border-emerald-200 text-[#154c2e]"
+                  >
+                    <Phone size={18} className="text-[#154c2e] shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-[11px] text-gray-500 font-medium">โทรศัพท์กลาง / ประชาสัมพันธ์</div>
+                      <div className="text-xs sm:text-sm font-bold truncate">061-028-7788</div>
+                    </div>
+                  </a>
+
+                  <a
+                    href="tel:042725042"
+                    className="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50/80 hover:bg-emerald-100 transition border border-emerald-200 text-[#154c2e]"
+                  >
+                    <Phone size={18} className="text-[#154c2e] shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-[11px] text-gray-500 font-medium">โทรศัพท์สำนักงานวิทยาเขต</div>
+                      <div className="text-xs sm:text-sm font-bold truncate">042-725-042</div>
+                    </div>
+                  </a>
+
+                  <a
+                    href="https://www.csc.ku.ac.th"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50/80 hover:bg-emerald-100 transition border border-emerald-200 text-[#154c2e]"
+                  >
+                    <Globe size={18} className="text-[#154c2e] shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-[11px] text-gray-500 font-medium">เว็บไซต์วิทยาเขต</div>
+                      <div className="text-xs sm:text-sm font-bold truncate">www.csc.ku.ac.th</div>
+                    </div>
+                  </a>
+
+                  <a
+                    href="https://occ.csc.ku.ac.th"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50/80 hover:bg-emerald-100 transition border border-emerald-200 text-[#154c2e]"
+                  >
+                    <Globe size={18} className="text-[#154c2e] shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-[11px] text-gray-500 font-medium">สำนักงานวิทยาเขต</div>
+                      <div className="text-xs sm:text-sm font-bold truncate">occ.csc.ku.ac.th</div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+
+              {/* เบอร์โทรหน่วยงานภายในที่สำคัญ */}
+              <div className="bg-white rounded-3xl p-5 shadow-xs border border-gray-100 space-y-3">
+                <h3 className="font-bold text-sm sm:text-base text-gray-900 flex items-center gap-2">
+                  <Phone size={18} className="text-amber-600" />
+                  <span>{lang === 'TH' ? 'หน่วยงานบริการนิสิตและการศึกษา' : 'Student & Academic Services'}</span>
+                </h3>
+
+                <div className="divide-y divide-gray-100 text-xs sm:text-sm">
+                  <div className="py-2.5 flex items-center justify-between">
+                    <span className="text-gray-700">งานรับเข้าศึกษา (ป.ตรี/ป.โท)</span>
+                    <a href="tel:0862241118" className="font-bold text-[#154c2e] hover:underline">086-224-1118, 042-725-052</a>
+                  </div>
+                  <div className="py-2.5 flex items-center justify-between">
+                    <span className="text-gray-700">งานทะเบียนและประมวลผล</span>
+                    <a href="tel:0817391745" className="font-bold text-[#154c2e] hover:underline">081-739-1745</a>
+                  </div>
+                  <div className="py-2.5 flex items-center justify-between">
+                    <span className="text-gray-700">งานทุนการศึกษา (กยศ. / กรอ.)</span>
+                    <a href="tel:0984854435" className="font-bold text-[#154c2e] hover:underline">098-485-4435</a>
+                  </div>
+                  <div className="py-2.5 flex items-center justify-between">
+                    <span className="text-gray-700">หน่วยหอพักนิสิต</span>
+                    <a href="tel:0885108007" className="font-bold text-[#154c2e] hover:underline">088-510-8007</a>
+                  </div>
+                  <div className="py-2.5 flex items-center justify-between">
+                    <span className="text-gray-700">ห้องสมุดวิทยาเขต</span>
+                    <a href="tel:042725093" className="font-bold text-[#154c2e] hover:underline">042-725-093</a>
+                  </div>
+                </div>
+              </div>
+
+              {/* คณะต่างๆ ภายในวิทยาเขต */}
+              <div className="bg-white rounded-3xl p-5 shadow-xs border border-gray-100 space-y-3">
+                <h3 className="font-bold text-sm sm:text-base text-gray-900 flex items-center gap-2">
+                  <GraduationCap size={18} className="text-[#154c2e]" />
+                  <span>{lang === 'TH' ? 'คณะวิชาภายในวิทยาเขต' : 'Faculties in Campus'}</span>
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                  <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100">
+                    <div className="font-bold text-gray-800">คณะทรัพยากรธรรมชาติและอุตสาหกรรมเกษตร</div>
+                    <div className="text-gray-500 mt-1">โทร: 042-725-036, 081-739-1789</div>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100">
+                    <div className="font-bold text-gray-800">คณะวิทยาศาสตร์และวิศวกรรมศาสตร์</div>
+                    <div className="text-gray-500 mt-1">โทร: 042-725-033</div>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100">
+                    <div className="font-bold text-gray-800">คณะศิลปศาสตร์และวิทยาการจัดการ</div>
+                    <div className="text-gray-500 mt-1">โทร: 042-725-039, 081-739-1377</div>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100">
+                    <div className="font-bold text-gray-800">คณะสาธารณสุขศาสตร์</div>
+                    <div className="text-gray-500 mt-1">โทร: 093-329-6556, 042-725-023</div>
                   </div>
                 </div>
               </div>
@@ -676,46 +897,52 @@ export default function Home() {
             /* หน้าหลัก: ส่วนการ์ดนิทรรศการและการประกวด + ไฮไลต์กำหนดการ */
             <div className={`pc-content-wrapper px-3 sm:px-4 ${viewMode === 'desktop' ? 'md:px-8 py-3 md:py-6 space-y-6 md:space-y-10' : 'py-3 space-y-5 max-w-[430px] mx-auto'}`}>
               
-              {/* 3.1 ส่วนการ์ด 4 ใบ */}
+              {/* 3.1 ส่วนการ์ดนิทรรศการและการประกวด (บน Desktop แสดงการ์ด Grid 4 ช่อง สไตล์เกษตรกำแพงแสน) */}
               <section id="exhibitions">
-                <div className="pc-section-header flex items-center justify-between mb-3 px-0.5">
-                  <h2 className="text-base md:text-xl font-bold text-[#154c2e] tracking-tight">
-                    {lang === 'TH' ? 'นิทรรศการและการประกวด' : 'Exhibitions & Contests'}
-                  </h2>
+                <div className="pc-section-header flex items-center justify-between mb-4 px-0.5">
+                  <div>
+                    <h2 className="text-base md:text-2xl font-bold text-[#154c2e] tracking-tight">
+                      {lang === 'TH' ? 'ข่าวสาร / กิจกรรม' : 'News & Activities'}
+                    </h2>
+                    <div className="hidden md:block w-12 h-1 bg-[#154c2e] rounded-full mt-1.5" />
+                  </div>
                   <button
-                    onClick={() => { setActiveTab('activities'); setMenuOpen(true); }}
-                    className="text-xs md:text-sm text-gray-500 flex items-center gap-0.5 hover:text-[#154c2e] cursor-pointer"
+                    onClick={() => { setActiveTab('activities'); }}
+                    className="text-xs md:text-sm font-semibold text-emerald-800 bg-emerald-50 hover:bg-[#154c2e] hover:text-white px-3.5 py-1.5 rounded-full border border-emerald-200 transition cursor-pointer flex items-center gap-1"
                   >
-                    <span>{lang === 'TH' ? 'ดูทั้งหมด' : 'View All'}</span>
+                    <span>{lang === 'TH' ? 'ข่าวทั้งหมด' : 'All News'}</span>
                     <ChevronRight size={14} />
                   </button>
                 </div>
 
-                {/* PC Grid (1 Row 4 Cards) แสดงเฉพาะตอนเลือกโหมด Desktop */}
+                {/* บน Desktop: แสดงเป็น Grid 4 การ์ดเรียงแถวหน้ากว้าง สวยงามแบบเว็บเกษตรกำแพงแสน */}
                 {viewMode === 'desktop' ? (
-                  <div className="hidden md:grid pc-cards-grid">
-                    {filteredCards.map((item) => (
+                  <div className="hidden md:grid grid-cols-4 gap-5">
+                    {cardsData.slice(0, 4).map((item) => (
                       <div
                         key={item.id}
                         onClick={() => openDetailPage(item)}
-                        className="pc-card-box"
+                        className="bg-white rounded-2xl overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col cursor-pointer group hover:-translate-y-1"
                       >
-                        <div className="pc-card-img-wrap">
+                        <div className="relative aspect-[16/10] bg-gray-50 overflow-hidden">
                           <img
                             src={item.image_url}
                             alt={lang === 'TH' ? item.title_th : item.title_en}
-                            className="pc-card-img"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
-                          <div className="pc-card-icon-badge">
-                            {item.icon === 'Sprout' && <Sprout size={18} />}
-                            {item.icon === 'Video' && <Video size={18} />}
-                            {item.icon === 'Leaf' && <Leaf size={18} />}
-                            {item.icon === 'Microscope' && <Microscope size={18} />}
-                          </div>
                         </div>
-                        <div className="pc-card-title-bar">
-                          <span className="pc-card-title-text line-clamp-1">
-                            {lang === 'TH' ? item.title_th : item.title_en}
+                        <div className="p-4 flex flex-col flex-1 justify-between gap-2.5">
+                          <div>
+                            <h3 className="font-bold text-sm text-gray-900 group-hover:text-[#154c2e] transition line-clamp-2 leading-snug">
+                              {lang === 'TH' ? item.title_th : item.title_en}
+                            </h3>
+                            <p className="text-[11px] text-gray-500 line-clamp-1 mt-1.5 flex items-center gap-1">
+                              <MapPin size={13} className="shrink-0 text-amber-600" />
+                              <span>{lang === 'TH' ? item.location_info_th : item.location_info_en}</span>
+                            </p>
+                          </div>
+                          <span className="text-[11px] font-semibold text-[#154c2e] group-hover:underline flex items-center gap-0.5">
+                            {lang === 'TH' ? 'รายละเอียดเพิ่มเติม →' : 'Learn more →'}
                           </span>
                         </div>
                       </div>
@@ -723,184 +950,75 @@ export default function Home() {
                   </div>
                 ) : null}
 
-                {/* Mobile Grid (2x2 Cards) แสดงบนมือถือ หรือเมื่อ PC สลับเป็นโหมด Mobile */}
-                <div className={`grid ${viewMode === 'desktop' ? 'md:hidden' : ''} grid-cols-2 gap-3 sm:gap-3.5`}>
-                  {filteredCards.map((item) => (
-                    <div
-                      key={item.id}
-                      onClick={() => openDetailPage(item)}
-                      className="bg-white rounded-2xl overflow-hidden shadow-xs border border-gray-100 flex flex-col home-card-hover cursor-pointer"
-                    >
-                      <div className="relative h-28 sm:h-32 overflow-hidden bg-gray-100">
+                {/* บน Mobile (หรือหน้าจอเล็ก): สไลเดอร์ภาพเลื่อนโปร่งใสเฉพาะ 4 ไฮไลต์หลัก พร้อมจุด 4 จุด */}
+                <div className={`relative w-full group py-1 ${viewMode === 'desktop' ? 'md:hidden' : 'block'}`}>
+                  {/* กรอบแสดงภาพแบบโปร่งใส ไร้ขอบขาว กลมกลืนกับพื้นหลัง */}
+                  <div className="relative w-full aspect-[1/1.25] sm:aspect-[1/1.2] max-h-[90vh] flex items-center justify-center">
+                    {highlightCards.map((item, idx) => (
+                      <div
+                        key={item.id || idx}
+                        onClick={() => openDetailPage(item)}
+                        className={`absolute inset-0 w-full h-full flex items-center justify-center transition-all duration-700 ease-in-out cursor-pointer ${
+                          idx === currentSlide
+                            ? 'opacity-100 scale-100 z-10'
+                            : 'opacity-0 scale-95 pointer-events-none z-0'
+                        }`}
+                      >
                         <img
                           src={item.image_url}
                           alt={lang === 'TH' ? item.title_th : item.title_en}
-                          className="w-full h-full object-cover home-card-img-zoom"
+                          className="w-full h-full object-contain"
                         />
-                        <div className="absolute bottom-2 left-2 w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-[#154c2e]">
-                          {item.icon === 'Sprout' && <Sprout size={14} />}
-                          {item.icon === 'Video' && <Video size={14} />}
-                          {item.icon === 'Leaf' && <Leaf size={14} />}
-                          {item.icon === 'Microscope' && <Microscope size={14} />}
-                        </div>
                       </div>
-                      <div className="p-2 sm:p-2.5 text-center flex-1 flex items-center justify-center min-h-[46px] bg-white">
-                        <span className="text-[11.5px] sm:text-[12px] font-bold text-gray-800 leading-tight line-clamp-1">
-                          {lang === 'TH' ? item.title_th : item.title_en}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
+                    ))}
+                  </div>
 
-              {/* 3.2 ส่วนไฮไลต์กำหนดการประกวด (Schedule / Timetable) */}
-              <section>
-                <div className="mb-3 px-0.5">
-                  <h2 className="text-base md:text-xl font-bold text-[#154c2e] tracking-tight">
-                    {lang === 'TH' ? 'ไฮไลต์กำหนดการประกวด' : 'Contest Highlights'}
-                  </h2>
-                  <div className="pc-title-underline" />
-                </div>
+                  {/* แถบควบคุมด้านล่างรูปภาพ: รวมปุ่ม ❮ [จุด 4 จุด] ❯ ไว้ด้วยกัน ไม่บังรูปภาพ */}
+                  <div className="flex items-center justify-center gap-3 sm:gap-4 mt-3.5">
+                    {/* ปุ่มย้อนกลับ ❮ */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentSlide((prev) => (prev - 1 + highlightCards.length) % highlightCards.length);
+                      }}
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#154c2e]/10 hover:bg-[#154c2e] text-[#154c2e] hover:text-white flex items-center justify-center transition cursor-pointer text-xs sm:text-sm font-bold border border-[#154c2e]/20 active:scale-95 shadow-2xs"
+                      title="ภาพก่อนหน้า"
+                    >
+                      ❮
+                    </button>
 
-                <div className={`grid grid-cols-2 gap-2.5 sm:gap-3 ${viewMode === 'desktop' ? 'md:gap-5' : 'gap-2.5'}`}>
-                  {/* การ์ดซ้าย (การประกวดกล้วยไม้) */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-1 md:gap-2">
-                      {dates.map((d, idx) => (
+                    {/* จุด Dot Indicators 4 จุด */}
+                    <div className="flex items-center gap-2">
+                      {highlightCards.map((_, idx) => (
                         <button
-                          key={d.th}
-                          onClick={() => setSelectedDateIdxLeft(idx)}
-                          className={`flex-1 py-1 md:py-1.5 text-[10px] sm:text-[11px] md:text-xs font-semibold rounded-full transition cursor-pointer text-center ${
-                            selectedDateIdxLeft === idx
-                              ? 'bg-[#c5a059] text-white shadow-xs'
-                              : 'bg-[#154c2e] text-white hover:bg-[#0f3a22]'
+                          key={idx}
+                          onClick={() => setCurrentSlide(idx)}
+                          className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                            idx === currentSlide
+                              ? 'w-7 bg-[#154c2e] shadow-xs'
+                              : 'w-2.5 bg-[#154c2e]/25 hover:bg-[#154c2e]/50'
                           }`}
-                        >
-                          {lang === 'TH' ? d.th : d.en}
-                        </button>
+                        />
                       ))}
                     </div>
 
-                    <div className="bg-white rounded-2xl p-3 md:p-5 shadow-xs border border-gray-100 flex flex-col justify-between min-h-[145px] md:min-h-[160px]">
-                      <div>
-                        <div className="text-[11px] md:text-xs text-gray-700 font-semibold">
-                          {lang === 'TH' ? `${dates[selectedDateIdxLeft].th}, 10:00น.` : `${dates[selectedDateIdxLeft].en}, 10:00 AM`}
-                        </div>
-                        <h4 className="text-xs md:text-sm font-bold text-gray-900 mt-1 line-clamp-1">
-                          {lang === 'TH' ? 'การประกวดกล้วยไม้' : 'Orchid Contest'}
-                        </h4>
-                        <p className="text-[10px] md:text-xs text-gray-500 mt-0.5">
-                          {lang === 'TH' ? 'ณ ลานกิจกรรม มก. ฉกส.' : 'At Central Plaza, KU CSC'}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 md:gap-2 mt-3 pt-2 border-t border-gray-50">
-                        <button
-                          onClick={() => alert(lang === 'TH' ? 'เปิดรับลงทะเบียน ณ จุดจัดงาน' : 'Registration at the venue')}
-                          className="flex-1 min-w-0 bg-[#154c2e] hover:bg-[#0f3a22] text-white text-[11px] sm:text-xs md:text-xs font-semibold py-1.5 md:py-2 px-1 rounded-full text-center transition cursor-pointer shadow-2xs whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center"
-                        >
-                          {lang === 'TH' ? 'ลงทะเบียน' : 'Register'}
-                        </button>
-                        <button
-                          onClick={() => openDetailPage(EXHIBITION_CARDS[0])}
-                          className="flex-1 min-w-0 border border-[#c5a059] text-[#c5a059] hover:bg-amber-50 text-[11px] sm:text-xs md:text-xs font-semibold py-1.5 md:py-2 px-1 rounded-full text-center transition cursor-pointer bg-white whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center"
-                        >
-                          {lang === 'TH' ? 'รายละเอียด' : 'Details'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* การ์ดขวา (การประกวดคลิปนวัตกรรม) */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-1 md:gap-2">
-                      {dates.map((d, idx) => (
-                        <button
-                          key={d.th}
-                          onClick={() => setSelectedDateIdxRight(idx)}
-                          className={`flex-1 py-1 md:py-1.5 text-[10px] sm:text-[11px] md:text-xs font-semibold rounded-full transition cursor-pointer text-center ${
-                            selectedDateIdxRight === idx
-                              ? 'bg-[#c5a059] text-white shadow-xs'
-                              : 'bg-[#154c2e] text-white hover:bg-[#0f3a22]'
-                          }`}
-                        >
-                          {lang === 'TH' ? d.th : d.en}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="bg-white rounded-2xl p-3 md:p-5 shadow-xs border border-gray-100 flex flex-col justify-between min-h-[145px] md:min-h-[160px]">
-                      <div>
-                        <div className="text-[11px] md:text-xs text-gray-700 font-semibold">
-                          {lang === 'TH' ? `${dates[selectedDateIdxRight].th}, 11:00น.` : `${dates[selectedDateIdxRight].en}, 11:00 AM`}
-                        </div>
-                        <h4 className="text-xs md:text-sm font-bold text-gray-900 mt-1 line-clamp-1">
-                          {lang === 'TH' ? 'การประกวดคลิปนวัตกรรม' : 'Innovation Video Contest'}
-                        </h4>
-                        <p className="text-[10px] md:text-xs text-gray-500 mt-0.5">
-                          {lang === 'TH' ? 'ห้องประชุม 1 อาคาร 7' : 'Meeting Room 1, Bldg 7'}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 md:gap-2 mt-3 pt-2 border-t border-gray-50">
-                        <button
-                          onClick={() => alert(lang === 'TH' ? 'เปิดรับลงทะเบียน ณ จุดจัดงาน' : 'Registration at the venue')}
-                          className="flex-1 min-w-0 bg-[#154c2e] hover:bg-[#0f3a22] text-white text-[11px] sm:text-xs md:text-xs font-semibold py-1.5 md:py-2 px-1 rounded-full text-center transition cursor-pointer shadow-2xs whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center"
-                        >
-                          {lang === 'TH' ? 'ลงทะเบียน' : 'Register'}
-                        </button>
-                        <button
-                          onClick={() => openDetailPage(EXHIBITION_CARDS[1])}
-                          className="flex-1 min-w-0 border border-[#c5a059] text-[#c5a059] hover:bg-amber-50 text-[11px] sm:text-xs md:text-xs font-semibold py-1.5 md:py-2 px-1 rounded-full text-center transition cursor-pointer bg-white whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center"
-                        >
-                          {lang === 'TH' ? 'รายละเอียด' : 'Details'}
-                        </button>
-                      </div>
-                    </div>
+                    {/* ปุ่มถัดไป ❯ */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentSlide((prev) => (prev + 1) % highlightCards.length);
+                      }}
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#154c2e]/10 hover:bg-[#154c2e] text-[#154c2e] hover:text-white flex items-center justify-center transition cursor-pointer text-xs sm:text-sm font-bold border border-[#154c2e]/20 active:scale-95 shadow-2xs"
+                      title="ภาพถัดไป"
+                    >
+                      ❯
+                    </button>
                   </div>
                 </div>
               </section>
 
-              {/* 3.3 ส่วนจุดสำคัญในงาน & การเดินทาง */}
-              <section>
-                <div
-                  onClick={() => setActiveTab('map')}
-                  className={`bg-white rounded-2xl p-3 ${viewMode === 'desktop' ? 'md:p-5' : 'p-3'} shadow-xs border border-gray-100 flex items-center justify-between gap-2.5 md:gap-6 cursor-pointer hover:shadow-md transition`}
-                >
-                  <div className="shrink-0">
-                    <div className="text-xs md:text-base font-bold text-gray-900 leading-tight">
-                      {lang === 'TH' ? 'จุดสำคัญในงาน' : 'Key Locations'}
-                    </div>
-                    <div className="text-xs md:text-base font-bold text-gray-900 leading-tight">
-                      {lang === 'TH' ? '& การเดินทาง' : '& Transportation'}
-                    </div>
-                  </div>
-
-                  <div className={`w-20 ${viewMode === 'desktop' ? 'md:w-36 md:h-20' : 'h-13'} rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shrink-0`}>
-                    <img
-                      src="/kaset-map.jpg"
-                      alt="Map Thumbnail"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1 md:gap-2 text-[11px] md:text-sm font-semibold text-gray-800">
-                    <div className="flex items-center gap-1.5 text-gray-800 hover:text-[#154c2e]">
-                      <Bus size={15} className="text-[#154c2e] shrink-0" />
-                      <span className="line-clamp-1">
-                        {lang === 'TH' ? 'แผนที่งาน เกษตรแฟร์' : 'Kaset Fair Map'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-gray-800 hover:text-[#154c2e]">
-                      <Train size={15} className="text-[#154c2e] shrink-0" />
-                      <span className="line-clamp-1">
-                        {lang === 'TH' ? 'วิธีการเดินทาง...' : 'How to get there...'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </section>
+              {/* 3.3 พื้นที่ว่างสำหรับใส่ไอเดียหรือฟีเจอร์ใหม่ในอนาคต */}
+              <div className="py-2" />
 
             </div>
           )}
