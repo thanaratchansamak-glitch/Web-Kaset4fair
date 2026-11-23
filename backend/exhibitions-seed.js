@@ -1,15 +1,3 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-
-const dbPath = path.resolve(__dirname, 'kaset4fair.db');
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error('❌ เชื่อมต่อฐานข้อมูลไม่สำเร็จ:', err.message);
-  } else {
-    console.log('✅ เชื่อมต่อ SQLite (kaset4fair.db) สำเร็จ!');
-  }
-});
-
 const ALL_EVENTS = [
   {
     id: 1,
@@ -348,7 +336,7 @@ TikTok / IG: kuna.ku.csc`,
     id: 9,
     title_th: 'การประกวดเทคโนโลยีและนวัตกรรมทางการเกษตรและอาหาร ระดับมัธยมศึกษา',
     title_en: 'Agricultural & Food Technology & Innovation Contest',
-    image_url: '/events/competition-4.jpg',
+    image_url: '/events/contest-agri-food-2026.jpg',
     category: 'academic',
     icon: 'Microscope',
     location_info_th: 'คณะทรัพยากรธรรมชาติและอุตสาหกรรมเกษตร (KUNA) มก. ฉกส.',
@@ -490,54 +478,123 @@ KU.CSC MUSIC CHALLENGE 2026
 • Finalist Announcement: December 4, 2026 at 04:30 PM
 • Prizes: Over 30,000 THB in scholarships with Trophies
 • Contact: 061-028-7788`
+  },
+  {
+    id: 12,
+    title_th: 'OPEN HOUSE KU.CSC 2026: ONE KU ALL PATHS',
+    title_en: 'OPEN HOUSE KU.CSC 2026: ONE KU ALL PATHS',
+    image_url: '/events/openhouse-2026.jpg',
+    category: 'academic',
+    icon: 'GraduationCap',
+    location_info_th: 'มหาวิทยาลัยเกษตรศาสตร์ วิทยาเขตเฉลิมพระเกียรติ จังหวัดสกลนคร',
+    location_info_en: 'Kasetsart University Chalermphrakiat Sakon Nakhon Province Campus',
+    time_info_th: '1 ธันวาคม 2569',
+    time_info_en: 'December 1, 2026',
+    description_th: `OPEN HOUSE KU.CSC 2026 — ONE KU ALL PATHS
+มหาวิทยาลัยเกษตรศาสตร์ วิทยาเขตเฉลิมพระเกียรติ จังหวัดสกลนคร
+
+📅 วันจัดงาน: 1 ธันวาคม 2569
+
+🎓 เปิดบ้านแนะนำหลักสูตรและเส้นทางการเรียนรู้ทั้ง 4 คณะ:
+• LAMS — คณะศิลปศาสตร์และวิทยาการจัดการ
+• KUNA — คณะทรัพยากรธรรมชาติและอุตสาหกรรมเกษตร
+• KUSE — คณะวิทยาศาสตร์และวิศวกรรมศาสตร์
+• KUPH — คณะสาธารณสุขศาสตร์
+
+🧭 กลุ่มสาระการเรียนรู้และสายอาชีพ:
+• Agri & Food • Environment • Science & Tech • Business & Innovation • Community & Society
+
+📲 สแกน QR Code บนโปสเตอร์เพื่อลงทะเบียนเข้าร่วมงาน`,
+    description_en: `OPEN HOUSE KU.CSC 2026 — ONE KU ALL PATHS
+• Date: December 1, 2026
+• Venue: Kasetsart University Chalermphrakiat Sakon Nakhon Province Campus
+• Faculties: LAMS, KUNA, KUSE, and KUPH
+• Highlights: Agri & Food, Environment, Science & Tech, Business & Innovation, Community & Society.`
+  },
+  {
+    id: 13,
+    title_th: "Chef's Table by KU & SDU Project: The Elite Isan Flavors",
+    title_en: "Chef's Table by KU & SDU Project: The Elite Isan Flavors",
+    image_url: '/events/chefs-table-2026.jpg',
+    category: 'exhibition',
+    icon: 'Sprout',
+    location_info_th: 'ณ หอประชุมวิโรจน์อิ่มพิทักษ์ มหาวิทยาลัยเกษตรศาสตร์ วิทยาเขตเฉลิมพระเกียรติ จังหวัดสกลนคร',
+    location_info_en: 'Wirot Imphithak Auditorium, KU CSC',
+    time_info_th: '27 พฤศจิกายน 2569',
+    time_info_en: 'November 27, 2026',
+    description_th: `เชิญชวนเข้าร่วมกิจกรรม Chef's Table by KU & SDU Project
+at Nontri Isan Kaset Fair 2026
+"The Elite Isan Flavors: ยกระดับวัตถุดิบท้องถิ่นอีสาน สู่อาหารชั้นเลิศ"
+
+👨‍🍳 ภายใต้ความร่วมมือ KU x SDU / Chef Jaruk & Culinary Team
+รังสรรค์เมนูโดย เชฟจารึก ศรีอรุณ และคณะ
+
+📅 วันที่จัดงาน: 27 พฤศจิกายน 2569
+📍 สถานที่: ณ หอประชุมวิโรจน์อิ่มพิทักษ์ มหาวิทยาลัยเกษตรศาสตร์ วิทยาเขตเฉลิมพระเกียรติ จังหวัดสกลนคร
+💳 ค่าคอร์ส: คอร์สละ 4,000 บาท
+
+🎓 รายได้หลังหักค่าใช้จ่าย มอบเป็นทุนการศึกษาให้กับ:
+• นิสิตมหาวิทยาลัยเกษตรศาสตร์ วิทยาเขตเฉลิมพระเกียรติ จังหวัดสกลนคร
+• นักศึกษาโรงเรียนการเรือน มหาวิทยาลัยสวนดุสิต
+• นักเรียนโรงเรียนบ้านนายอ จังหวัดสกลนคร
+
+📞 ติดต่อสอบถามข้อมูลเพิ่มเติมได้ที่: 062-8959355, 081-7391789
+📲 Facebook: คณะทรัพยากรธรรมชาติและอุตสาหกรรมเกษตร | IG & TikTok: kuna.ku.csc`,
+    description_en: `Chef's Table by KU & SDU Project — The Elite Isan Flavors
+• Date: November 27, 2026
+• Venue: Wirot Imphithak Auditorium, KU CSC
+• Course Price: 4,000 THB (Proceeds after expenses support student scholarships)
+• Contact: 062-8959355, 081-7391789`
+  },
+  {
+    id: 14,
+    title_th: 'ข้อมูลรายละเอียดนิทรรศการ ฝ่ายความก้าวหน้าทางเทคโนโลยีทางการเกษตร และนวัตกรรม ในงานเกษตรแฟร์ 69',
+    title_en: 'Exhibition Details: Agricultural Technology & Innovation (Kaset Fair 69)',
+    image_url: '/events/exhibition-details-2026.jpg',
+    category: 'exhibition',
+    icon: 'Sprout',
+    location_info_th: 'โซนนิทรรศการวิชาการ (จุดที่ 1–14) มก. ฉกส.',
+    location_info_en: 'Academic Exhibition Zone (Points 1–14), KU CSC',
+    time_info_th: '27 พฤศจิกายน – 5 ธันวาคม 2569',
+    time_info_en: 'Nov 27 – Dec 5, 2026',
+    description_th: `ข้อมูลรายละเอียดนิทรรศการ ฝ่ายความก้าวหน้าทางเทคโนโลยีทางการเกษตร และนวัตกรรม ในงานเกษตรแฟร์ 69
+
+🌟 Flagship 1: หนองหารโมเดล (พื้นที่ต้นแบบเพื่อความยั่งยืน)
+เน้นการฟื้นฟูพื้นที่ชุ่มน้ำ คุณภาพน้ำ การดำเนินงาน Living Lab และการยกระดับเศรษฐกิจชุมชน
+
+🌟 Flagship 2: One Health อีสานตอนบน (สุขภาพหนึ่งเดียว)
+มุ่งเน้นการเชื่อมโยงสุขภาพคน สัตว์ สิ่งแวดล้อม ความปลอดภัยด้านอาหาร และสาธารณสุขแม่นยำ (ระบบ S-FERA, การเฝ้าระวัง AMR)
+
+🌟 Flagship 3 และ PLATFORM 1: นวัตกรรมเกษตรอัจฉริยะ สู่เกษตรอาหารมูลค่าสูง & Circular Bioeconomy
+ประยุกต์ใช้ Smart Farm, AI & IoT, การแปรรูปเพิ่มมูลค่า และเศรษฐกิจหมุนเวียน 5 หมวดหลัก:
+• ผลงานดีเด่นด้านทรัพย์สินทางปัญญา (มก.ฉกส.)
+• กลุ่มโคเนื้อ (ห่วงโซ่คุณค่าครบวงจร)
+• กลุ่มข้าว (ข้าวเหนียวลุ่มน้ำโขง, ข้าวฮาง, ข้าวเม่านายอ)
+• กลุ่มครามและป่าให้สี (ผ้าทอคราม, ย้อมสีเปลือกไม้)
+• กลุ่มพืชสมุนไพร (สเปรย์สมุนไพรโปร่งฟ้า, ผลิตภัณฑ์จากบัว, ฟ้าทะลายโจร)
+
+🌟 PLATFORM 2: พลังชุมชนและนวัตกรรมสังคม
+กลุ่มเกษตรกรชุมชนรอบหนองหาร วิสาหกิจชุมชน และหลักสูตร Non-Degree
+
+🏛️ นิทรรศการ 10 หน่วยงานภาครัฐและภาคีเครือข่ายความร่วมมือ:
+1. สำนักงานพลังงานจังหวัดสกลนคร
+2. เรือนจำจังหวัดสกลนคร
+3. ธนาคารเพื่อการเกษตรและสหกรณ์การเกษตร (ธ.ก.ส.) จังหวัดสกลนคร
+4. ศูนย์ศึกษาการพัฒนาภูพานอันเนื่องมาจากพระราชดำริ
+5. สถานีพัฒนาที่ดินสกลนคร
+6. โครงการพัฒนาที่ดินมูลนิธิชัยพัฒนา (บ้านกุงศรี)
+7. โรงงานหลวงอาหารสำเร็จรูปที่ 3 (เต่างอย)
+8. การยางแห่งประเทศไทย จังหวัดสกลนคร
+9. ศูนย์วิจัยข้าวสกลนคร
+10. ศูนย์วิจัยและพัฒนาอาหารสัตว์สกลนคร`,
+    description_en: `Exhibition Details: Agricultural Technology & Innovation (Kaset Fair 69)
+• Flagship 1: Nong Han Model (Sustainable Wetland & Living Lab)
+• Flagship 2: Upper Isan One Health
+• Flagship 3 & Platform 1: Smart Agriculture, AI & IoT, Value-Added Food & Circular Bioeconomy (Beef Cattle, Rice, Indigo, Medicinal Herbs)
+• Platform 2: Community Power & Social Innovation
+• Plus 10 Government & Partner Network Exhibitions (Points 1–14).`
   }
 ];
 
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS exhibitions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title_th TEXT NOT NULL,
-    title_en TEXT NOT NULL,
-    image_url TEXT,
-    icon TEXT,
-    description_th TEXT,
-    description_en TEXT,
-    location_info_th TEXT,
-    location_info_en TEXT,
-    time_info_th TEXT,
-    time_info_en TEXT,
-    sort_order INTEGER
-  )`);
 
-  // อัปเดตข้อมูลทั้งหมด 11 รายการลงใน SQLite ให้เป็นเวอร์ชันล่าสุด 100%
-  db.run("DELETE FROM exhibitions", () => {
-    console.log('🔄 ล้างข้อมูลเก่า และกำลังบันทึกข้อมูลกิจกรรมครบทั้ง 11 รายการลงใน SQLite...');
-    const stmt = db.prepare(`
-      INSERT INTO exhibitions (id, title_th, title_en, image_url, icon, description_th, description_en, location_info_th, location_info_en, time_info_th, time_info_en, sort_order)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    ALL_EVENTS.forEach((item, idx) => {
-      stmt.run(
-        item.id,
-        item.title_th,
-        item.title_en,
-        item.image_url,
-        item.icon,
-        item.description_th,
-        item.description_en,
-        item.location_info_th,
-        item.location_info_en,
-        item.time_info_th,
-        item.time_info_en,
-        idx + 1
-      );
-    });
-
-    stmt.finalize(() => {
-      console.log('✅ บันทึกกิจกรรมทั้งหมด 11 กิจกรรมลง SQLite สำเร็จเรียบร้อย!');
-    });
-  });
-});
-
-module.exports = db;
+module.exports = ALL_EVENTS;

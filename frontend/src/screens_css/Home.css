@@ -101,6 +101,7 @@
   0% {
     transform: translateX(100%);
   }
+
   100% {
     transform: translateX(0);
   }
@@ -115,6 +116,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -124,9 +126,9 @@
   animation: fadeInBackdrop 0.22s ease-out forwards;
 }
 
-/* ========================================================
+/* ====================
    Floating PC Viewport Switcher (มุมล่างขวา ไม่บัง Header เด็ดขาด)
-   ======================================================== */
+   ==================== */
 .pc-floating-switcher {
   display: none;
 }
@@ -177,7 +179,7 @@
   /* 1. เมื่อสลับเป็นโหมด Desktop (เต็มจอ) */
   .home-screen-wrapper.view-desktop {
     background-color: #f4f9f5;
-    background-image: url('/bg.jpg');
+    background-image: url('/kasetfair/bg.jpg');
     background-size: cover;
     background-position: top center;
     background-repeat: no-repeat;

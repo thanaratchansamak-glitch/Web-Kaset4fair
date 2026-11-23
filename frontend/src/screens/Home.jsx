@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../screens_css/Home.css';
 import { ALL_EVENTS, BANNER_EVENT } from '../data/eventsData';
+import InteractiveMap from '../components/InteractiveMap';
 import {
   Search,
   MapPin,
@@ -32,6 +33,8 @@ import {
 // รายการกิจกรรมทั้งหมด
 const EXHIBITION_CARDS = ALL_EVENTS;
 
+const assetUrl = (p) => (p && p.startsWith('/') ? `${import.meta.env.BASE_URL}${p.slice(1)}` : p);
+
 export default function Home() {
   const [lang, setLang] = useState('TH');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -40,32 +43,48 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('home');
   const [selectedItem, setSelectedItem] = useState(null);
-// State เก็บข้อมูลที่ดึงมาจาก SQLite (มี Fallback เริ่มต้นจาก EXHIBITION_CARDS เผื่อเซิร์ฟเวอร์ยังไม่เปิด)
-const [cardsData, setCardsData] = useState(EXHIBITION_CARDS);
+  // State เก็บข้อมูลที่ดึงมาจาก SQLite (มี Fallback เริ่มต้นจาก EXHIBITION_CARDS เผื่อเซิร์ฟเวอร์ยังไม่เปิด)
+  const [cardsData, setCardsData] = useState(EXHIBITION_CARDS);
 
-// ดึงข้อมูลจาก Backend SQLite (รองรับทั้ง localhost และ IP ของเครื่องเมื่อเปิดจากมือถือ)
-useEffect(() => {
-  const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:5000/api/exhibitions'
-    : `http://${window.location.hostname}:5000/api/exhibitions`;
+  // ดึงข้อมูลจาก Backend SQLite (รองรับทั้ง dev proxy และ reverse proxy /kasetfair/)
+  useEffect(() => {
+    const apiBase = window.location.pathname.startsWith('/kasetfair')
+      ? '/kasetfair/api'
+      : '/api';
+    const backendUrl = `${apiBase}/exhibitions`;
 
-  fetch(backendUrl)
-    .then((res) => {
-      if (!res.ok) throw new Error('Network response was not ok');
-      return res.json();
-    })
-    .then((data) => {
-      if (Array.isArray(data) && data.length > 0) {
-        console.log('✅ โหลดข้อมูลจาก SQLite สำเร็จ:', data);
-        setCardsData(data);
-      }
-    })
-    .catch((err) => {
-      console.warn('⚠️ ไม่สามารถเชื่อมต่อ Backend SQLite ได้ (จะใช้ข้อมูลสำรองในเว็บแทน):', err.message);
-    });
-}, []);
-  // สถานะโหมดการแสดงผลบน PC: 'desktop' (เว็บใหญ่เต็มจอ) หรือ 'mobile' (จำลองมือถือ)
-  const [viewMode, setViewMode] = useState('desktop');
+    fetch(backendUrl)
+      .then((res) => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          console.log('✅ โหลดข้อมูลจาก SQLite สำเร็จ:', data);
+          setCardsData(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('⚠️ ไม่สามารถเชื่อมต่อ Backend SQLite ได้ (จะใช้ข้อมูลสำรองในเว็บแทน):', err.message);
+      });
+  }, []);
+  // โหมดทดสอบ: แสดงปุ่มสลับ PC / Mobile เมื่อรันใน Dev Server (localhost:5173) หรือเปิดด้วย ?preview=1
+  const isTestMode =
+    import.meta.env.DEV ||
+    (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('preview') === '1');
+
+  // แสดงผลอัตโนมัติตามขนาดหน้าจอ: >= 768px (PC, Notebook, iPad/Tablet) = 'desktop', มือถือ (< 768px) = 'mobile'
+  const [viewMode, setViewMode] = useState(() =>
+    typeof window !== 'undefined' && window.innerWidth >= 768 ? 'desktop' : 'mobile'
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const updateViewMode = (e) => setViewMode(e.matches ? 'desktop' : 'mobile');
+    setViewMode(mq.matches ? 'desktop' : 'mobile');
+    mq.addEventListener('change', updateViewMode);
+    return () => mq.removeEventListener('change', updateViewMode);
+  }, []);
 
   // State สำหรับสไลด์เลื่อนรูปภาพนิทรรศการและการประกวดอัตโนมัติ
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -106,32 +125,33 @@ useEffect(() => {
 
   return (
     <div className={`home-screen-wrapper view-${viewMode}`}>
-
-      {/* Floating Mode Switcher (ลอยตัวอยู่ที่มุมล่างขวาของหน้าจอ ไม่บัง Header) */}
-      <div className="pc-floating-switcher">
-        <button
-          onClick={() => setViewMode('desktop')}
-          className={`pc-switcher-btn ${viewMode === 'desktop' ? 'active' : 'inactive'}`}
-          title={lang === 'TH' ? 'สลับเป็นโหมดเว็บใหญ่ (คอมพิวเตอร์)' : 'Switch to Desktop View'}
-        >
-          <Monitor size={15} />
-          <span>PC</span>
-        </button>
-        <button
-          onClick={() => setViewMode('mobile')}
-          className={`pc-switcher-btn ${viewMode === 'mobile' ? 'active' : 'inactive'}`}
-          title={lang === 'TH' ? 'สลับเป็นโหมดจำลองมือถือ' : 'Switch to Mobile View'}
-        >
-          <Smartphone size={15} />
-          <span>Mobile</span>
-        </button>
-      </div>
+      {/* ปุ่มสลับ PC / Mobile แสดงเฉพาะในโหมดทดสอบ (Dev Server หรือ ?preview=1) */}
+      {isTestMode && (
+        <div className="pc-floating-switcher">
+          <button
+            onClick={() => setViewMode('desktop')}
+            className={`pc-switcher-btn ${viewMode === 'desktop' ? 'active' : 'inactive'}`}
+            title={lang === 'TH' ? 'สลับเป็นโหมดเว็บใหญ่ (คอมพิวเตอร์)' : 'Switch to Desktop View'}
+          >
+            <Monitor size={15} />
+            <span>PC</span>
+          </button>
+          <button
+            onClick={() => setViewMode('mobile')}
+            className={`pc-switcher-btn ${viewMode === 'mobile' ? 'active' : 'inactive'}`}
+            title={lang === 'TH' ? 'สลับเป็นโหมดจำลองมือถือ' : 'Switch to Mobile View'}
+          >
+            <Smartphone size={15} />
+            <span>Mobile</span>
+          </button>
+        </div>
+      )}
 
       <div className={`home-mobile-container view-${viewMode}`}>
-        
-        {/* =========================================================
+
+        {/* =====================
             1. Top Header Bar (Desktop & Mobile)
-            ========================================================= */}
+            ===================== */}
         <header className={`home-header view-${viewMode}`}>
           {/* ฝั่งซ้าย: ตราสัญลักษณ์เกษตรแฟร์ นนทรีอีสาน และข้อความเกษตรแฟร์ นนทรีอีสาน */}
           <div
@@ -140,7 +160,7 @@ useEffect(() => {
           >
             <div className="relative">
               <img
-                src="/emblem-pure.png"
+                src={assetUrl('/emblem-pure.png')}
                 alt="เกษตรแฟร์ นนทรีอีสาน"
                 className="w-10 h-10 md:w-11 md:h-11 object-contain drop-shadow-sm shrink-0 group-hover:scale-105 transition-transform duration-200"
               />
@@ -176,10 +196,10 @@ useEffect(() => {
               </button>
               <button
                 onClick={() => {
-                  const conf = cardsData.find(c => c.id === 4) || cardsData[cardsData.length - 1];
+                  const conf = cardsData.find(c => c.id === 10 || c.title_th?.includes('ประชุมวิชาการ')) || cardsData[cardsData.length - 1];
                   openDetailPage(conf);
                 }}
-                className="pc-nav-item"
+                className={`pc-nav-item ${activeTab === 'detail' && selectedItem?.id === 10 ? 'active' : ''}`}
               >
                 {lang === 'TH' ? 'ประชุมวิชาการ' : 'Conference'}
               </button>
@@ -264,7 +284,7 @@ useEffect(() => {
             >
               <div className="bg-[#154c2e] text-white p-4 flex items-center justify-between shadow-xs">
                 <div className="flex items-center gap-2.5">
-                  <img src="/ku-logo.png" alt="KU" className="w-8 h-8 object-contain drop-shadow-xs" />
+                  <img src={assetUrl('/ku-logo.png')} alt="KU" className="w-8 h-8 object-contain drop-shadow-xs" />
                   <div>
                     <h3 className="text-sm font-bold leading-tight">
                       {lang === 'TH' ? 'เกษตรแฟร์' : 'Kaset Fair'}
@@ -283,11 +303,10 @@ useEffect(() => {
               <div className="p-3 space-y-2 flex-1 overflow-y-auto">
                 <button
                   onClick={() => { setActiveTab('home'); setSelectedItem(null); setMenuOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition menu-item-hover cursor-pointer ${
-                    activeTab === 'home'
-                      ? 'bg-emerald-50 text-[#154c2e] border border-emerald-300 shadow-xs'
-                      : 'text-gray-700 hover:bg-gray-50 border border-transparent'
-                  }`}
+                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition menu-item-hover cursor-pointer ${activeTab === 'home'
+                    ? 'bg-emerald-50 text-[#154c2e] border border-emerald-300 shadow-xs'
+                    : 'text-gray-700 hover:bg-gray-50 border border-transparent'
+                    }`}
                 >
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${activeTab === 'home' ? 'bg-[#154c2e] text-[#facc15]' : 'bg-gray-100 text-gray-600'}`}>
                     <HomeIcon size={18} />
@@ -302,11 +321,10 @@ useEffect(() => {
 
                 <button
                   onClick={() => { setActiveTab('map'); setSelectedItem(null); setMenuOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition menu-item-hover cursor-pointer ${
-                    activeTab === 'map'
-                      ? 'bg-emerald-50 text-[#154c2e] border border-emerald-300 shadow-xs'
-                      : 'text-gray-700 hover:bg-gray-50 border border-transparent'
-                  }`}
+                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition menu-item-hover cursor-pointer ${activeTab === 'map'
+                    ? 'bg-emerald-50 text-[#154c2e] border border-emerald-300 shadow-xs'
+                    : 'text-gray-700 hover:bg-gray-50 border border-transparent'
+                    }`}
                 >
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${activeTab === 'map' ? 'bg-[#154c2e] text-[#facc15]' : 'bg-amber-100/70 text-amber-700'}`}>
                     <MapPin size={18} />
@@ -321,30 +339,68 @@ useEffect(() => {
 
                 <button
                   onClick={() => { setActiveTab('activities'); setSelectedItem(null); setMenuOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition menu-item-hover cursor-pointer ${
-                    activeTab === 'activities'
-                      ? 'bg-emerald-50 text-[#154c2e] border border-emerald-300 shadow-xs'
-                      : 'text-gray-700 hover:bg-gray-50 border border-transparent'
-                  }`}
+                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition menu-item-hover cursor-pointer ${activeTab === 'activities'
+                    ? 'bg-emerald-50 text-[#154c2e] border border-emerald-300 shadow-xs'
+                    : 'text-gray-700 hover:bg-gray-50 border border-transparent'
+                    }`}
                 >
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${activeTab === 'activities' ? 'bg-[#154c2e] text-[#facc15]' : 'bg-emerald-100/60 text-[#154c2e]'}`}>
                     <Calendar size={18} />
                   </div>
                   <div className="text-left">
-                    <div className="font-bold">{lang === 'TH' ? 'กิจกรรม' : 'Activities'}</div>
+                    <div className="font-bold">{lang === 'TH' ? 'กิจกรรม/นิทรรศการ' : 'Activities'}</div>
                     <div className="text-[10px] text-gray-400 font-normal">
-                      {lang === 'TH' ? 'ตารางประกวดและกิจกรรม' : 'Contests & Schedules'}
+                      {lang === 'TH' ? 'ตารางประกวดและนิทรรศการ' : 'Contests & Exhibitions'}
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    const conf = cardsData.find(c => c.id === 10 || c.title_th?.includes('ประชุมวิชาการ')) || cardsData[cardsData.length - 1];
+                    openDetailPage(conf);
+                    setMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition menu-item-hover cursor-pointer ${activeTab === 'detail' && selectedItem?.id === 10
+                    ? 'bg-emerald-50 text-[#154c2e] border border-emerald-300 shadow-xs'
+                    : 'text-gray-700 hover:bg-gray-50 border border-transparent'
+                    }`}
+                >
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${activeTab === 'detail' && selectedItem?.id === 10 ? 'bg-[#154c2e] text-[#facc15]' : 'bg-sky-100/70 text-sky-700'}`}>
+                    <GraduationCap size={18} />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-bold">{lang === 'TH' ? 'ประชุมวิชาการ' : 'Conference'}</div>
+                    <div className="text-[10px] text-gray-400 font-normal">
+                      {lang === 'TH' ? 'งานประชุมวิชาการระดับชาติ' : 'Academic Conference'}
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => { setActiveTab('shop'); setSelectedItem(null); setMenuOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition menu-item-hover cursor-pointer ${activeTab === 'shop'
+                    ? 'bg-emerald-50 text-[#154c2e] border border-emerald-300 shadow-xs'
+                    : 'text-gray-700 hover:bg-gray-50 border border-transparent'
+                    }`}
+                >
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${activeTab === 'shop' ? 'bg-[#154c2e] text-[#facc15]' : 'bg-orange-100/70 text-orange-700'}`}>
+                    <ShoppingBag size={18} />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-bold">{lang === 'TH' ? 'ร้านค้า' : 'Shop'}</div>
+                    <div className="text-[10px] text-gray-400 font-normal">
+                      {lang === 'TH' ? 'โซนร้านค้าและอาหาร' : 'Shops & Food Zones'}
                     </div>
                   </div>
                 </button>
 
                 <button
                   onClick={() => { setActiveTab('more'); setSelectedItem(null); setMenuOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition menu-item-hover cursor-pointer ${
-                    activeTab === 'more'
-                      ? 'bg-emerald-50 text-[#154c2e] border border-emerald-300 shadow-xs'
-                      : 'text-gray-700 hover:bg-gray-50 border border-transparent'
-                  }`}
+                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition menu-item-hover cursor-pointer ${activeTab === 'more'
+                    ? 'bg-emerald-50 text-[#154c2e] border border-emerald-300 shadow-xs'
+                    : 'text-gray-700 hover:bg-gray-50 border border-transparent'
+                    }`}
                 >
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${activeTab === 'more' ? 'bg-[#154c2e] text-[#facc15]' : 'bg-gray-100 text-gray-600'}`}>
                     <MoreHorizontal size={18} />
@@ -525,9 +581,9 @@ useEffect(() => {
           </div>
         )}
 
-        {/* =========================================================
+        {/* =====================
             2. Hero Banner Section
-            ========================================================= */}
+            ===================== */}
         {activeTab === 'home' && (
           <div className="flex flex-col items-center w-full">
             {/* ส่วนแบนเนอร์ศิลปินและการแสดง: กดดูรายละเอียดได้เต็มตา ไม่ล้นขอบจอ */}
@@ -538,7 +594,7 @@ useEffect(() => {
                 title={lang === 'TH' ? 'คลิกเพื่อดูรายละเอียดศิลปินและกำหนดการทั้งหมด' : 'Click to view full artists lineup and schedules'}
               >
                 <img
-                  src="/events/banner-bg.jpg"
+                  src={assetUrl('/events/banner-bg.jpg')}
                   alt="แบนเนอร์ศิลปินและตารางการแสดง เกษตรแฟร์ นนทรีอีสาน"
                   className="w-full h-auto max-h-[460px] object-contain block group-hover:scale-[1.01] transition-transform duration-300"
                 />
@@ -552,9 +608,8 @@ useEffect(() => {
             <div className={`w-full flex items-center justify-center my-3 sm:my-4 ${viewMode === 'desktop' ? 'md:my-5' : 'my-3'} px-4`}>
               <button
                 onClick={() => setActiveTab('map')}
-                className={`btn-banner-yellow whitespace-nowrap text-[11px] sm:text-xs ${
-                  viewMode === 'desktop' ? 'md:text-sm md:px-8 md:py-3' : 'px-4 py-2.5'
-                } shrink-0 cursor-pointer shadow-md hover:scale-105 transition-transform duration-200`}
+                className={`btn-banner-yellow whitespace-nowrap text-[11px] sm:text-xs ${viewMode === 'desktop' ? 'md:text-sm md:px-8 md:py-3' : 'px-4 py-2.5'
+                  } shrink-0 cursor-pointer shadow-md hover:scale-105 transition-transform duration-200`}
               >
                 <MapPin size={16} className="shrink-0" />
                 <span>{lang === 'TH' ? 'แผนที่การจัดงาน' : 'Event Map'}</span>
@@ -564,131 +619,82 @@ useEffect(() => {
           </div>
         )}
 
-        {/* =========================================================
+        {/* =====================
             3. เนื้อหาหลัก (Main Content)
-            ========================================================= */}
+            ===================== */}
         <main className="flex-1">
           {activeTab === 'map' ? (
-            /* หน้าแผนผังงาน */
-            <div className={`px-4 py-6 ${viewMode === 'desktop' ? 'max-w-5xl' : 'max-w-md'} mx-auto space-y-4 animate-fade-in`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className={`text-lg ${viewMode === 'desktop' ? 'md:text-2xl' : 'text-lg'} font-bold text-[#154c2e]`}>
-                    {lang === 'TH' ? 'แผนผังงานเกษตรแฟร์ นนทรีอีสาน' : 'KASET FAIR Event Map (KU CSC)'}
-                  </h2>
-                  <p className="text-[11px] md:text-xs text-gray-500">
-                    {lang === 'TH' ? 'มหาวิทยาลัยเกษตรศาสตร์ วิทยาเขตเฉลิมพระเกียรติ จังหวัดสกลนคร' : 'Kasetsart University Chalermphrakiat Sakon Nakhon Province Campus'}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setActiveTab('home')}
-                  className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
-                >
-                  <span>←</span>
-                  <span>{lang === 'TH' ? 'หน้าหลัก' : 'Home'}</span>
-                </button>
-              </div>
-
-              <div className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
-                <div className="relative overflow-auto max-h-[75vh] bg-white flex items-center justify-center">
-                  <img
-                    src="/kaset-map.jpg"
-                    alt="KASET 4 FAIR Map"
-                    className="w-full h-auto object-contain cursor-zoom-in hover:opacity-95 transition"
-                    onClick={() => window.open('/kaset-map.jpg', '_blank')}
-                  />
-                </div>
-                <div className="p-3 md:p-4 bg-emerald-50 text-xs md:text-sm text-[#154c2e] flex items-center justify-between">
-                  <span className="text-[11px] md:text-xs">
-                    {lang === 'TH' ? '💡 คลิกที่รูปเพื่อดูรายละเอียดรหัสอาคาร' : '💡 Click on the image to view building details'}
-                  </span>
-                  <a
-                    href="/kaset-map.jpg"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="bg-[#154c2e] text-white px-3.5 py-1.5 rounded-lg font-semibold text-[11px] md:text-xs shadow-xs hover:bg-[#0f3a22] transition"
-                  >
-                    {lang === 'TH' ? 'เปิดเต็มจอ' : 'Full Screen'}
-                  </a>
-                </div>
+            /* หน้าแผนผังงานแบบ Interactive Leaflet (ใช้ข้อมูล Vector OSM ในตัว ไม่ติด API Key) */
+            <div className={`px-3 sm:px-4 py-4 md:py-6 ${viewMode === 'desktop' ? 'max-w-6xl' : 'max-w-md'} mx-auto animate-fade-in`}>
+              <div className="bg-white/95 backdrop-blur-xs rounded-3xl p-4 sm:p-6 shadow-sm border border-emerald-100/70">
+                <InteractiveMap
+                  lang={lang}
+                  assetUrl={assetUrl}
+                  viewMode={viewMode}
+                  onBackHome={() => setActiveTab('home')}
+                />
               </div>
             </div>
           ) : activeTab === 'activities' ? (
-            /* หน้ากิจกรรมทั้งหมด (เปิดจากแถบเมนู 3 ขีด หรือปุ่มกิจกรรม) */
-            <div className={`px-3 sm:px-4 py-4 md:py-6 ${viewMode === 'desktop' ? 'max-w-5xl' : 'max-w-md'} mx-auto space-y-5 animate-fade-in`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className={`text-lg ${viewMode === 'desktop' ? 'md:text-2xl' : 'text-lg'} font-bold text-[#154c2e]`}>
-                    {lang === 'TH' ? 'กิจกรรมและนิทรรศการทั้งหมด' : 'All Activities & Exhibitions'}
+            /* หน้ากิจกรรมทั้งหมด (ดีไซน์เรียบหรูแบบข่าวประชาสัมพันธ์) */
+            <div className={`px-3 sm:px-4 py-4 md:py-8 ${viewMode === 'desktop' ? 'max-w-5xl' : 'max-w-md'} mx-auto animate-fade-in`}>
+              <div className="bg-white/95 backdrop-blur-xs rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm border border-emerald-100/70 space-y-6">
+                <div className="flex items-center justify-between gap-3 border-b border-gray-100 pb-4">
+                  <h2 className={`text-xl ${viewMode === 'desktop' ? 'md:text-3xl' : 'text-xl'} font-bold text-[#154c2e] tracking-tight`}>
+                    {lang === 'TH' ? 'ข่าวประชาสัมพันธ์และกิจกรรม' : 'News & Activities'}
                   </h2>
-                  <p className="text-[11px] md:text-xs text-gray-500">
-                    {lang === 'TH' ? 'รวมนิทรรศการ การประกวดแข่งขัน และกิจกรรมในงานเกษตรแฟร์' : 'All exhibitions, contests, and event activities'}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setActiveTab('home')}
-                  className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
-                >
-                  <span>←</span>
-                  <span>{lang === 'TH' ? 'หน้าหลัก' : 'Home'}</span>
-                </button>
-              </div>
-
-              {/* รายการกิจกรรมและการประกวดทั้งหมด */}
-              <div className={`grid grid-cols-1 ${viewMode === 'desktop' ? 'sm:grid-cols-2 md:grid-cols-3 gap-5' : 'gap-3.5'}`}>
-                {cardsData.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => openDetailPage(item)}
-                    className="bg-white rounded-2xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 border border-gray-100 flex flex-col cursor-pointer group hover:-translate-y-1"
+                  <button
+                    onClick={() => setActiveTab('home')}
+                    className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
                   >
-                    <div className="relative aspect-[4/3] bg-gray-50 flex items-center justify-center overflow-hidden">
-                      <img
-                        src={item.image_url}
-                        alt={lang === 'TH' ? item.title_th : item.title_en}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <span className="absolute top-2.5 right-2.5 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
-                        {lang === 'TH' ? 'คลิกดูรายละเอียด' : 'View Details'}
-                      </span>
-                    </div>
+                    <span>←</span>
+                    <span>{lang === 'TH' ? 'หน้าหลัก' : 'Home'}</span>
+                  </button>
+                </div>
 
-                    <div className="p-3.5 sm:p-4 flex flex-col flex-1 justify-between gap-3">
-                      <div>
-                        <h3 className="font-bold text-xs sm:text-sm text-gray-900 group-hover:text-[#154c2e] transition line-clamp-2 leading-snug">
-                          {lang === 'TH' ? item.title_th : item.title_en}
-                        </h3>
-                        <div className="mt-2 space-y-1 text-[11px] text-gray-500">
-                          <div className="flex items-center gap-1.5 line-clamp-1">
-                            <MapPin size={13} className="shrink-0 text-amber-600" />
-                            <span>{lang === 'TH' ? item.location_info_th : item.location_info_en}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5 line-clamp-1">
-                            <Calendar size={13} className="shrink-0 text-amber-600" />
-                            <span>{lang === 'TH' ? item.time_info_th : item.time_info_en}</span>
-                          </div>
-                        </div>
+                {/* รายการกิจกรรมสไตล์ Editorial Feed */}
+                <div className={`grid grid-cols-1 ${viewMode === 'desktop' ? 'md:grid-cols-2 gap-x-8 gap-y-10' : 'gap-8'}`}>
+                  {cardsData.map((item) => (
+                    <article
+                      key={item.id}
+                      onClick={() => openDetailPage(item)}
+                      className="flex flex-col cursor-pointer group border-b border-gray-100 pb-7 last:border-b-0"
+                    >
+                      <div className="w-full overflow-hidden rounded-xl bg-gray-50/70 border border-gray-100 flex items-center justify-center">
+                        <img
+                          src={assetUrl(item.image_url)}
+                          alt={lang === 'TH' ? item.title_th : item.title_en}
+                          className={`w-full ${viewMode === 'desktop' ? 'h-72 object-contain bg-white' : 'h-auto object-contain'} group-hover:scale-[1.02] transition-transform duration-300`}
+                        />
                       </div>
 
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openDetailPage(item);
-                        }}
-                        className="w-full bg-emerald-50 hover:bg-[#154c2e] text-[#154c2e] hover:text-white py-2 rounded-xl text-xs font-semibold transition border border-emerald-200 hover:border-[#154c2e] flex items-center justify-center gap-1"
-                      >
-                        <span>{lang === 'TH' ? 'อ่านรายละเอียดทั้งหมด' : 'Read Full Details'}</span>
-                        <ChevronRight size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                      <h3 className="mt-4 font-bold text-lg md:text-xl text-[#154c2e] group-hover:text-[#0f3a22] transition leading-snug">
+                        {lang === 'TH' ? item.title_th : item.title_en}
+                      </h3>
+
+                      <div className="mt-3.5 inline-flex items-center gap-3 text-sm font-semibold text-[#154c2e] group-hover:gap-4 transition-all">
+                        <span className="inline-block w-10 h-[2px] bg-[#154c2e] rounded-full" />
+                        <span>Continue reading</span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
               </div>
             </div>
           ) : activeTab === 'detail' && selectedItem ? (
-            /* หน้ารายละเอียดแบบเต็มหน้าจอ (แสดงรูปเต็มใบ ไม่ตัดขอบ ไม่ทับข้อความ) */
-            <div className={`px-3 sm:px-4 py-4 md:py-6 ${viewMode === 'desktop' ? 'max-w-4xl' : 'max-w-md'} mx-auto space-y-4 animate-fade-in`}>
+            /* หน้ารายละเอียดสไตล์บทความข่าวประชาสัมพันธ์ (หัวข้อใหญ่บนสุด -> โปสเตอร์เต็มใบ -> เนื้อหาอ่านง่าย) */
+            <div className={`px-3 sm:px-4 py-4 md:py-8 ${viewMode === 'desktop' ? 'max-w-3xl' : 'max-w-md'} mx-auto space-y-4 animate-fade-in`}>
               <div className="flex items-center justify-between gap-2">
+                <button
+                  onClick={() => {
+                    setActiveTab('activities');
+                    setSelectedItem(null);
+                  }}
+                  className="text-xs md:text-sm text-[#154c2e] font-semibold bg-white/95 px-3.5 py-1.5 rounded-full hover:bg-emerald-50 transition cursor-pointer border border-emerald-200 shrink-0 whitespace-nowrap inline-flex items-center gap-1 shadow-2xs"
+                >
+                  <span>←</span>
+                  <span>{lang === 'TH' ? 'กิจกรรมทั้งหมด' : 'All Activities'}</span>
+                </button>
                 <button
                   onClick={() => {
                     setActiveTab('home');
@@ -696,52 +702,103 @@ useEffect(() => {
                   }}
                   className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 shrink-0 whitespace-nowrap inline-flex items-center gap-1"
                 >
-                  <span>←</span>
                   <span>{lang === 'TH' ? 'หน้าหลัก' : 'Home'}</span>
                 </button>
-                <span className="text-[11px] md:text-xs font-medium text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
-                  {lang === 'TH' ? 'นิทรรศการและการประกวด' : 'Exhibition & Contest'}
-                </span>
               </div>
 
-              {/* การ์ดรายละเอียด: แสดงรูปภาพเต็มใบแท้จริง ไม่ครอบตัด และพื้นหลังขาวสะอาด ไร้แถบสีเข้ม */}
-              <div className="bg-white rounded-3xl overflow-hidden shadow-lg border border-gray-100 flex flex-col">
-                <div className="w-full bg-white p-0 sm:p-2 flex items-center justify-center min-h-[300px] max-h-[82vh]">
+              <article className="bg-white/95 backdrop-blur-xs rounded-3xl p-5 sm:p-8 md:p-10 shadow-sm border border-emerald-100/70 space-y-6">
+                {/* 1. หัวข้อใหญ่ด้านบนสุด */}
+                <h1 className="text-2xl sm:text-3xl md:text-[32px] font-bold text-[#154c2e] leading-snug tracking-tight">
+                  {lang === 'TH' ? selectedItem.title_th : selectedItem.title_en}
+                </h1>
+
+                {/* 2. รูปโปสเตอร์เต็มใบ */}
+                <div className="w-full overflow-hidden rounded-xl bg-white border border-gray-100">
                   <img
-                    src={selectedItem.image_url}
+                    src={assetUrl(selectedItem.image_url)}
                     alt={lang === 'TH' ? selectedItem.title_th : selectedItem.title_en}
-                    className="w-full h-auto max-h-[80vh] object-contain"
+                    className="w-full h-auto object-contain block"
                   />
                 </div>
 
-                <div className="p-4 sm:p-6 md:p-7 space-y-4">
-                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-[#154c2e] leading-snug">
+                {/* 3. หัวข้อย่อยสีเขียว + เนื้อหาบทความอ่านง่าย */}
+                <div className="space-y-4 pt-1">
+                  <h2 className="text-lg sm:text-xl font-bold text-emerald-600 leading-snug">
                     {lang === 'TH' ? selectedItem.title_th : selectedItem.title_en}
                   </h2>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-emerald-50/70 p-3 sm:p-4 rounded-2xl border border-emerald-100 text-xs sm:text-sm">
-                    <div className="flex items-start gap-2 text-[#154c2e]">
-                      <MapPin size={16} className="shrink-0 mt-0.5 text-amber-600" />
-                      <span>
-                        <strong>{lang === 'TH' ? 'สถานที่จัดงาน:' : 'Location:'}</strong>{' '}
-                        {lang === 'TH' ? selectedItem.location_info_th : selectedItem.location_info_en}
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-2 text-[#154c2e]">
-                      <Calendar size={16} className="shrink-0 mt-0.5 text-amber-600" />
-                      <span>
-                        <strong>{lang === 'TH' ? 'เวลาเปิดเข้าชม:' : 'Time:'}</strong>{' '}
-                        {lang === 'TH' ? selectedItem.time_info_th : selectedItem.time_info_en}
-                      </span>
+                  <div className="text-[15px] sm:text-base text-gray-800 leading-relaxed whitespace-pre-line">
+                    {lang === 'TH' ? selectedItem.description_th : selectedItem.description_en}
+                  </div>
+                </div>
+
+                {/* 4. สรุปกำหนดการและสถานที่ด้านล่าง */}
+                <div className="pt-5 border-t border-gray-100 space-y-2.5 text-[15px] sm:text-base text-gray-800">
+                  <h3 className="font-bold text-emerald-600 flex items-center gap-2">
+                    <span>📌</span>
+                    <span>{lang === 'TH' ? 'กำหนดการและสถานที่จัดงาน' : 'Schedule & Venue'}</span>
+                  </h3>
+                  <ul className="space-y-1.5 pl-1">
+                    <li>
+                      • <strong>{lang === 'TH' ? 'วันและเวลา:' : 'Date & Time:'}</strong>{' '}
+                      {lang === 'TH' ? selectedItem.time_info_th : selectedItem.time_info_en}
+                    </li>
+                    <li>
+                      • <strong>{lang === 'TH' ? 'สถานที่:' : 'Location:'}</strong>{' '}
+                      {lang === 'TH' ? selectedItem.location_info_th : selectedItem.location_info_en}
+                    </li>
+                  </ul>
+                </div>
+              </article>
+            </div>
+          ) : activeTab === 'shop' ? (
+            /* หน้าร้านค้าและผังโซนร้านค้า */
+            <div className={`px-3 sm:px-4 py-4 md:py-8 ${viewMode === 'desktop' ? 'max-w-5xl' : 'max-w-md'} mx-auto space-y-6 animate-fade-in`}>
+              <div className="bg-white/95 backdrop-blur-xs rounded-3xl p-5 sm:p-8 shadow-sm border border-emerald-100/70 space-y-6">
+                <div className="flex items-center justify-between gap-3 border-b border-gray-100 pb-4">
+                  <div>
+                    <h2 className={`text-xl ${viewMode === 'desktop' ? 'md:text-3xl' : 'text-xl'} font-bold text-[#154c2e]`}>
+                      {lang === 'TH' ? 'ผังโซนร้านค้าและกิจกรรมนิสิต' : 'Shops & Student Zone Maps'}
+                    </h2>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {lang === 'TH' ? 'งานเกษตรแฟร์นนทรีอีสาน ประจำปี 2569 มก. ฉกส.' : 'Nontri Isan Kaset Fair 2026, KU CSC'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('home')}
+                    className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
+                  >
+                    <span>←</span>
+                    <span>{lang === 'TH' ? 'หน้าหลัก' : 'Home'}</span>
+                  </button>
+                </div>
+
+                <div className="space-y-8">
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-bold text-[#154c2e]">
+                      {lang === 'TH' ? '1. ผังร้านค้าทั้งหมด (เกษตรแฟร์นนทรีอีสาน 2569)' : '1. Overall Shops Map (2026)'}
+                    </h3>
+                    <div className="rounded-2xl overflow-hidden border border-gray-100 bg-white">
+                      <img
+                        src={assetUrl('/maps/zone-shops-2026.jpg')}
+                        alt="ผังร้านค้า เกษตรแฟร์นนทรีอีสาน 2569"
+                        className="w-full h-auto object-contain cursor-zoom-in"
+                        onClick={() => window.open(assetUrl('/maps/zone-shops-2026.jpg'), '_blank')}
+                      />
                     </div>
                   </div>
 
-                  <div className="space-y-2 pt-1">
-                    <h3 className="text-xs sm:text-sm font-bold text-gray-800">
-                      {lang === 'TH' ? 'รายละเอียดกิจกรรม' : 'Event Details'}
+                  <div className="space-y-3 pt-4 border-t border-gray-100">
+                    <h3 className="text-lg font-bold text-[#154c2e]">
+                      {lang === 'TH' ? '2. ผังโซนร้านค้านิสิตและเวที Happy University' : '2. Student Shops & Happy University Zone'}
                     </h3>
-                    <div className="text-xs sm:text-sm text-gray-700 leading-relaxed whitespace-pre-line bg-gray-50/80 p-3.5 sm:p-5 rounded-2xl border border-gray-100">
-                      {lang === 'TH' ? selectedItem.description_th : selectedItem.description_en}
+                    <div className="rounded-2xl overflow-hidden border border-gray-100 bg-white">
+                      <img
+                        src={assetUrl('/maps/zone-student-shops-2026.jpg')}
+                        alt="ผังโซนร้านค้านิสิต"
+                        className="w-full h-auto object-contain cursor-zoom-in"
+                        onClick={() => window.open(assetUrl('/maps/zone-student-shops-2026.jpg'), '_blank')}
+                      />
                     </div>
                   </div>
                 </div>
@@ -896,7 +953,7 @@ useEffect(() => {
           ) : (
             /* หน้าหลัก: ส่วนการ์ดนิทรรศการและการประกวด + ไฮไลต์กำหนดการ */
             <div className={`pc-content-wrapper px-3 sm:px-4 ${viewMode === 'desktop' ? 'md:px-8 py-3 md:py-6 space-y-6 md:space-y-10' : 'py-3 space-y-5 max-w-[430px] mx-auto'}`}>
-              
+
               {/* 3.1 ส่วนการ์ดนิทรรศการและการประกวด (บน Desktop แสดงการ์ด Grid 4 ช่อง สไตล์เกษตรกำแพงแสน) */}
               <section id="exhibitions">
                 <div className="pc-section-header flex items-center justify-between mb-4 px-0.5">
@@ -926,7 +983,7 @@ useEffect(() => {
                       >
                         <div className="relative aspect-[16/10] bg-gray-50 overflow-hidden">
                           <img
-                            src={item.image_url}
+                            src={assetUrl(item.image_url)}
                             alt={lang === 'TH' ? item.title_th : item.title_en}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
@@ -958,14 +1015,13 @@ useEffect(() => {
                       <div
                         key={item.id || idx}
                         onClick={() => openDetailPage(item)}
-                        className={`absolute inset-0 w-full h-full flex items-center justify-center transition-all duration-700 ease-in-out cursor-pointer ${
-                          idx === currentSlide
-                            ? 'opacity-100 scale-100 z-10'
-                            : 'opacity-0 scale-95 pointer-events-none z-0'
-                        }`}
+                        className={`absolute inset-0 w-full h-full flex items-center justify-center transition-all duration-700 ease-in-out cursor-pointer ${idx === currentSlide
+                          ? 'opacity-100 scale-100 z-10'
+                          : 'opacity-0 scale-95 pointer-events-none z-0'
+                          }`}
                       >
                         <img
-                          src={item.image_url}
+                          src={assetUrl(item.image_url)}
                           alt={lang === 'TH' ? item.title_th : item.title_en}
                           className="w-full h-full object-contain"
                         />
@@ -993,11 +1049,10 @@ useEffect(() => {
                         <button
                           key={idx}
                           onClick={() => setCurrentSlide(idx)}
-                          className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                            idx === currentSlide
-                              ? 'w-7 bg-[#154c2e] shadow-xs'
-                              : 'w-2.5 bg-[#154c2e]/25 hover:bg-[#154c2e]/50'
-                          }`}
+                          className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${idx === currentSlide
+                            ? 'w-7 bg-[#154c2e] shadow-xs'
+                            : 'w-2.5 bg-[#154c2e]/25 hover:bg-[#154c2e]/50'
+                            }`}
                         />
                       ))}
                     </div>
@@ -1024,13 +1079,13 @@ useEffect(() => {
           )}
         </main>
 
-        {/* =========================================================
+        {/* =====================
             4. Footer สีเขียวเข้ม มก.
-            ========================================================= */}
+            ===================== */}
         <footer className={`bg-[#154c2e] text-white ${viewMode === 'desktop' ? 'p-4 md:px-8 md:py-6 mt-8 md:mt-12' : 'p-3 sm:p-3.5 mt-5'}`}>
           <div className="max-w-6xl mx-auto flex items-center gap-2.5 sm:gap-3 md:gap-5">
             <img
-              src="/ku-logo.png"
+              src={assetUrl('/ku-logo.png')}
               alt="KU Logo"
               className={`${viewMode === 'desktop' ? 'w-12 h-12 md:w-16 md:h-16' : 'w-10 h-10'} object-contain drop-shadow-md shrink-0`}
             />
@@ -1045,7 +1100,7 @@ useEffect(() => {
                 {lang === 'TH' ? 'ติดต่อ: สำนักงานวิทยาเขต | 042-725-042, 061-028-7788' : 'Contact: Campus Office | 042-725-042, 061-028-7788'}
               </p>
               <p className={`${viewMode === 'desktop' ? 'text-[8.5px] md:text-[11px]' : 'text-[8.5px]'} text-white/50 pt-0.5`}>
-                © Copyright Kasetsart University CSC | Kaset4fair
+                © Copyright Kasetsart University CSC | Kasetfair
               </p>
             </div>
           </div>

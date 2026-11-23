@@ -1,12 +1,12 @@
 @echo off
-title Backend Server
+title Kasetfair Backend Server
 color 0A
-echo ===================================================
-echo               BACKEND API SERVER
-echo ===================================================
+echo ===============
+echo            Kasetfair - BACKEND SERVER
+echo ===============
 echo.
-cd /d "%~dp0\backend"
-echo [INFO] Starting Backend Server on http://localhost:3000 ...
+cd /d "%~dp0backend"
+echo [INFO] Starting backend on http://localhost:4001/kasetfair/
 echo.
-node index.js
+node server.js
 pause
