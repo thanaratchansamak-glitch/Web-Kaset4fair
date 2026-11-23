@@ -79,7 +79,8 @@ export default function InteractiveMap({ lang, assetUrl, viewMode = 'desktop', o
 
     MAP_LOCATIONS.forEach((loc) => {
       const isStudent = loc.category === 'student';
-      const bg = isStudent ? '#15803d' : '#ca8a04';
+      const isShop = [21, 22, 23].includes(loc.number);
+      const bg = isShop ? '#ec4899' : isStudent ? '#15803d' : '#ca8a04';
       const icon = L.divIcon({
         className: 'k4f-custom-marker',
         html: `<div style="width:24px;height:24px;border-radius:9999px;background:${bg};color:#fff;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;">${loc.number}</div>`,
@@ -87,7 +88,7 @@ export default function InteractiveMap({ lang, assetUrl, viewMode = 'desktop', o
         iconAnchor: [12, 12],
       });
 
-      const accent = isStudent ? '#15803d' : '#a16207';
+      const accent = isShop ? '#db2777' : isStudent ? '#15803d' : '#a16207';
       const popupContent = () => {
         const th = langRef.current === 'TH';
         return `<div style="font-family:inherit;font-size:12px;font-weight:700;color:${accent};">${loc.number}. ${th ? loc.name_th : loc.name_en}</div><div style="font-size:11px;color:#4b5563;margin-top:2px;max-width:240px;">${th ? loc.detail_th : loc.detail_en}</div>`;
@@ -229,7 +230,11 @@ export default function InteractiveMap({ lang, assetUrl, viewMode = 'desktop', o
   const renderBadge = (loc) => (
     <span
       className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[11px] font-bold shrink-0 ${
-        loc.category === 'student' ? 'bg-emerald-700' : 'bg-yellow-600'
+        [21, 22, 23].includes(loc.number)
+          ? 'bg-pink-500'
+          : loc.category === 'student'
+            ? 'bg-emerald-700'
+            : 'bg-yellow-600'
       }`}
     >
       {loc.number}
