@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../screens_css/Home.css';
-import { ALL_EVENTS, BANNER_EVENT } from '../data/eventsData';
+import { ALL_EVENTS, BANNER_EVENT, OPEN_HOUSE_EVENT, EXHIBITION_DETAIL_EVENT } from '../data/eventsData';
+import { RECOMMENDED_SHOPS, ALL_STUDENT_SHOPS } from '../data/recommendedShops';
 import InteractiveMap from '../components/InteractiveMap';
 import {
   Search,
@@ -61,7 +62,7 @@ export default function Home() {
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           console.log('✅ โหลดข้อมูลจาก SQLite สำเร็จ:', data);
-          setCardsData(data);
+          setCardsData(data.filter((item) => item.id !== 12 && item.id !== 14));
         }
       })
       .catch((err) => {
@@ -88,6 +89,45 @@ export default function Home() {
 
   // State สำหรับสไลด์เลื่อนรูปภาพนิทรรศการและการประกวดอัตโนมัติ
   const [currentSlide, setCurrentSlide] = useState(0);
+  const slideTouchStartX = useRef(null);
+  const shopScrollRef = useRef(null);
+  const shopDragState = useRef({ down: false, startX: 0, scrollLeft: 0, moved: false });
+  // State สำหรับสไลด์แบนเนอร์หลักด้านบน (สลับภาพอัตโนมัติ)
+  const [currentBanner, setCurrentBanner] = useState(0);
+  // State สำหรับ Lightbox ดูภาพโปสเตอร์ร้านค้านิสิตแบบเต็มจอ
+  const [selectedShopIdx, setSelectedShopIdx] = useState(null);
+
+  const heroBanners = [
+    {
+      src: '/events/banner-bg.jpg',
+      alt: 'แบนเนอร์ศิลปินและตารางการแสดง เกษตรแฟร์ นนทรีอีสาน',
+      hintTh: 'คลิกดูรายละเอียดศิลปิน & ตารางงาน',
+      hintEn: 'Click to view artists & schedule',
+      onClick: () => openDetailPage(BANNER_EVENT),
+    },
+    {
+      src: '/events/banner-student-zone.jpg',
+      alt: 'ขอเชิญชวนอุดหนุนร้านค้า โซนร้านค้านิสิต งานเกษตรแฟร์นนทรีอีสาน ครั้งที่ 20',
+      hintTh: 'คลิกดูร้านค้านิสิตทั้งหมด',
+      hintEn: 'Click to view all student shops',
+      onClick: () => setActiveTab('shop'),
+    },
+    {
+      src: '/events/openhouse-2026.jpg',
+      alt: 'OPEN HOUSE KU.CSC 2026: ONE KU ALL PATHS',
+      hintTh: 'คลิกดูรายละเอียด OPEN HOUSE 2026',
+      hintEn: 'Click to view OPEN HOUSE 2026 details',
+      onClick: () => openDetailPage(OPEN_HOUSE_EVENT),
+    },
+  ];
+
+  // ตั้งเวลาสลับภาพแบนเนอร์หลักอัตโนมัติทุกๆ 4.5 วินาที
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentBanner((prev) => (prev + 1) % heroBanners.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [heroBanners.length]);
 
 
 
@@ -117,11 +157,51 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // กรองการ์ดตามคำค้นหา
-  const filteredCards = cardsData.filter((item) =>
-    item.title_th.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.title_en.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // ค้นหาเฉพาะ ร้านค้านิสิต และ กิจกรรม/นิทรรศการ/การประกวด
+  const q = searchQuery.trim().toLowerCase();
+  const searchResults = q
+    ? [
+        ...ALL_STUDENT_SHOPS.filter((s) =>
+          [s.name_th, s.name_en, s.desc_th, s.desc_en, s.tag_th, s.tag_en]
+            .filter(Boolean)
+            .some((t) => String(t).toLowerCase().includes(q))
+        )
+          .slice(0, 8)
+          .map((s) => ({
+            key: `sh-${s.id}`,
+            badge: lang === 'TH' ? 'ร้านค้า' : 'Shop',
+            badgeCls: 'bg-pink-100 text-pink-700',
+            title: lang === 'TH' ? s.name_th : s.name_en,
+            sub: lang === 'TH' ? s.desc_th : s.desc_en,
+            onSelect: () => {
+              const idx = ALL_STUDENT_SHOPS.findIndex((x) => x.id === s.id);
+              setSearchOpen(false);
+              setSearchQuery('');
+              setActiveTab('shop');
+              if (idx >= 0) setSelectedShopIdx(idx);
+            },
+          })),
+        ...[BANNER_EVENT, OPEN_HOUSE_EVENT, EXHIBITION_DETAIL_EVENT, ...cardsData]
+          .filter((item) =>
+            [item.title_th, item.title_en, item.location_info_th, item.location_info_en, item.detail_th, item.detail_en]
+              .filter(Boolean)
+              .some((t) => String(t).toLowerCase().includes(q))
+          )
+          .slice(0, 8)
+          .map((item) => ({
+            key: `ev-${item.id}`,
+            badge: lang === 'TH' ? 'กิจกรรม' : 'Event',
+            badgeCls: 'bg-emerald-100 text-[#154c2e]',
+            title: lang === 'TH' ? item.title_th : item.title_en,
+            sub: lang === 'TH' ? item.location_info_th : item.location_info_en,
+            onSelect: () => {
+              setSearchOpen(false);
+              setSearchQuery('');
+              openDetailPage(item);
+            },
+          })),
+      ]
+    : [];
 
   return (
     <div className={`home-screen-wrapper view-${viewMode}`}>
@@ -192,7 +272,13 @@ export default function Home() {
                 onClick={() => { setActiveTab('activities'); setSelectedItem(null); }}
                 className={`pc-nav-item ${activeTab === 'activities' ? 'active' : ''}`}
               >
-                {lang === 'TH' ? 'กิจกรรม/นิทรรศการ' : 'Activities'}
+                {lang === 'TH' ? 'กิจกรรม/ประกวด' : 'Activities'}
+              </button>
+              <button
+                onClick={() => openDetailPage(EXHIBITION_DETAIL_EVENT)}
+                className={`pc-nav-item ${activeTab === 'detail' && selectedItem?.id === 14 ? 'active' : ''}`}
+              >
+                {lang === 'TH' ? 'นิทรรศการ' : 'Exhibition'}
               </button>
               <button
                 onClick={() => {
@@ -258,16 +344,83 @@ export default function Home() {
 
         {/* ช่องค้นหา (แสดงเมื่อกดแว่นขยาย) */}
         {searchOpen && (
-          <div className="bg-emerald-50/90 backdrop-blur-xs px-4 py-2.5 border-b border-emerald-100 z-30">
-            <div className="max-w-xl mx-auto">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={lang === 'TH' ? 'ค้นหานิทรรศการ, การประกวด...' : 'Search exhibitions, contests...'}
-                className="w-full bg-white text-sm px-4 py-2 rounded-full border border-emerald-200 focus:outline-none focus:border-[#154c2e] shadow-xs"
-                autoFocus
-              />
+          <div className="bg-emerald-50/95 backdrop-blur-xs px-4 py-3 border-b border-emerald-100 z-30 shadow-sm">
+            <div className="max-w-xl mx-auto space-y-2.5">
+              <div className="relative flex items-center">
+                <Search size={16} className="absolute left-3.5 text-emerald-700/70 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setSearchOpen(false);
+                    } else if (e.key === 'Enter' && searchResults.length > 0) {
+                      searchResults[0].onSelect();
+                    }
+                  }}
+                  placeholder={
+                    lang === 'TH'
+                      ? 'ค้นหาร้านค้า, กิจกรรม, การประกวด...'
+                      : 'Search shops, activities, contests...'
+                  }
+                  className="w-full bg-white text-sm pl-10 pr-9 py-2 rounded-full border border-emerald-200 focus:outline-none focus:border-[#154c2e] shadow-xs"
+                  autoFocus
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 cursor-pointer"
+                    aria-label="Clear search"
+                  >
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+
+              {/* คำค้นหายอดนิยมเมื่อยังไม่ได้พิมพ์ */}
+              {!q ? (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-[11px] text-gray-500 font-medium mr-0.5">
+                    {lang === 'TH' ? 'แนะนำ:' : 'Try:'}
+                  </span>
+                  {(lang === 'TH'
+                    ? ['หมูปิ้ง', 'บัวลอย', 'ข้าวซอย', 'ประกวด', 'นิทรรศการ']
+                    : ['Grill', 'Cafe', 'Halal', 'Contest', 'Exhibition']
+                  ).map((kw) => (
+                    <button
+                      key={kw}
+                      onClick={() => setSearchQuery(kw)}
+                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white hover:bg-[#154c2e] hover:text-white text-[#154c2e] border border-emerald-200 transition cursor-pointer"
+                    >
+                      {kw}
+                    </button>
+                  ))}
+                </div>
+              ) : searchResults.length > 0 ? (
+                <div className="bg-white rounded-2xl border border-emerald-100 shadow-md max-h-72 overflow-y-auto divide-y divide-gray-100">
+                  {searchResults.map((res) => (
+                    <button
+                      key={res.key}
+                      onClick={res.onSelect}
+                      className="w-full px-3.5 py-2.5 flex items-start gap-2.5 text-left hover:bg-emerald-50/70 transition cursor-pointer"
+                    >
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 mt-0.5 ${res.badgeCls}`}>
+                        {res.badge}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-bold text-gray-900 line-clamp-1">{res.title}</div>
+                        {res.sub && <div className="text-[11px] text-gray-500 line-clamp-1 mt-0.5">{res.sub}</div>}
+                      </div>
+                      <ChevronRight size={14} className="text-gray-400 shrink-0 mt-1" />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white rounded-2xl border border-emerald-100 px-4 py-3 text-center text-xs text-gray-500">
+                  {lang === 'TH' ? `ไม่พบผลลัพธ์สำหรับ "${searchQuery}"` : `No results found for "${searchQuery}"`}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -348,9 +501,30 @@ export default function Home() {
                     <Calendar size={18} />
                   </div>
                   <div className="text-left">
-                    <div className="font-bold">{lang === 'TH' ? 'กิจกรรม/นิทรรศการ' : 'Activities'}</div>
+                    <div className="font-bold">{lang === 'TH' ? 'กิจกรรม/ประกวด' : 'Activities'}</div>
                     <div className="text-[10px] text-gray-400 font-normal">
-                      {lang === 'TH' ? 'ตารางประกวดและนิทรรศการ' : 'Contests & Exhibitions'}
+                      {lang === 'TH' ? 'ข่าวประชาสัมพันธ์และการประกวด' : 'News & Contests'}
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    openDetailPage(EXHIBITION_DETAIL_EVENT);
+                    setMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition menu-item-hover cursor-pointer ${activeTab === 'detail' && selectedItem?.id === 14
+                    ? 'bg-emerald-50 text-[#154c2e] border border-emerald-300 shadow-xs'
+                    : 'text-gray-700 hover:bg-gray-50 border border-transparent'
+                    }`}
+                >
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${activeTab === 'detail' && selectedItem?.id === 14 ? 'bg-[#154c2e] text-[#facc15]' : 'bg-lime-100/70 text-lime-700'}`}>
+                    <Sprout size={18} />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-bold">{lang === 'TH' ? 'นิทรรศการ' : 'Exhibition'}</div>
+                    <div className="text-[10px] text-gray-400 font-normal">
+                      {lang === 'TH' ? 'รายละเอียดนิทรรศการ 14 จุด' : '14 Exhibition Points'}
                     </div>
                   </div>
                 </button>
@@ -586,20 +760,50 @@ export default function Home() {
             ===================== */}
         {activeTab === 'home' && (
           <div className="flex flex-col items-center w-full">
-            {/* ส่วนแบนเนอร์ศิลปินและการแสดง: กดดูรายละเอียดได้เต็มตา ไม่ล้นขอบจอ */}
+            {/* ส่วนแบนเนอร์หลัก (สลับภาพอัตโนมัติ + กดเลื่อนได้) */}
             <div className={`w-full ${viewMode === 'desktop' ? 'max-w-6xl px-2 sm:px-4 pt-2 md:pt-4' : 'px-0 pt-0'}`}>
               <section
-                onClick={() => openDetailPage(BANNER_EVENT)}
-                className="relative w-full overflow-hidden flex items-center justify-center bg-transparent cursor-pointer group"
-                title={lang === 'TH' ? 'คลิกเพื่อดูรายละเอียดศิลปินและกำหนดการทั้งหมด' : 'Click to view full artists lineup and schedules'}
+                onClick={() => heroBanners[currentBanner]?.onClick()}
+                className="relative w-full overflow-hidden rounded-none sm:rounded-2xl flex items-center justify-center bg-transparent cursor-pointer group"
+                title={lang === 'TH' ? heroBanners[currentBanner]?.hintTh : heroBanners[currentBanner]?.hintEn}
               >
+                {/* ภาพฐานสำหรับคงสัดส่วนความสูงไม่ให้กระตุกตอนสลับ */}
                 <img
-                  src={assetUrl('/events/banner-bg.jpg')}
-                  alt="แบนเนอร์ศิลปินและตารางการแสดง เกษตรแฟร์ นนทรีอีสาน"
-                  className="w-full h-auto max-h-[460px] object-contain block group-hover:scale-[1.01] transition-transform duration-300"
+                  src={assetUrl(heroBanners[0].src)}
+                  alt=""
+                  aria-hidden="true"
+                  className="w-full h-auto max-h-[460px] object-contain block opacity-0 pointer-events-none select-none"
                 />
-                <span className="absolute bottom-2 right-2 bg-black/65 backdrop-blur-xs text-white text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-medium shadow-md opacity-90 group-hover:opacity-100 transition-opacity">
-                  {lang === 'TH' ? ' คลิกดูรายละเอียดศิลปิน & ตารางงาน' : ' Click to view details'}
+                {heroBanners.map((b, idx) => (
+                  <img
+                    key={b.src}
+                    src={assetUrl(b.src)}
+                    alt={b.alt}
+                    className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-700 ease-in-out ${
+                      idx === currentBanner ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+                    }`}
+                  />
+                ))}
+
+                {/* จุดบอกตำแหน่งแบนเนอร์ */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-black/35 backdrop-blur-xs px-2.5 py-1 rounded-full">
+                  {heroBanners.map((b, idx) => (
+                    <button
+                      key={b.src}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentBanner(idx);
+                      }}
+                      className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                        idx === currentBanner ? 'w-5 bg-[#facc15]' : 'w-2 bg-white/60 hover:bg-white'
+                      }`}
+                      aria-label={`Banner ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <span className="hidden sm:inline-block absolute bottom-2 right-2 z-20 bg-black/65 backdrop-blur-xs text-white text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-medium shadow-md opacity-90 group-hover:opacity-100 transition-opacity">
+                  {lang === 'TH' ? heroBanners[currentBanner]?.hintTh : heroBanners[currentBanner]?.hintEn}
                 </span>
               </section>
             </div>
@@ -636,45 +840,61 @@ export default function Home() {
               </div>
             </div>
           ) : activeTab === 'activities' ? (
-            /* หน้ากิจกรรมทั้งหมด (ดีไซน์เรียบหรูแบบข่าวประชาสัมพันธ์) */
-            <div className={`px-3 sm:px-4 py-4 md:py-8 ${viewMode === 'desktop' ? 'max-w-5xl' : 'max-w-md'} mx-auto animate-fade-in`}>
+            /* หน้ากิจกรรมทั้งหมด (การ์ด Grid สไตล์เดียวกับหน้าร้านค้า) */
+            <div className={`px-3 sm:px-4 py-4 md:py-8 ${viewMode === 'desktop' ? 'max-w-6xl' : 'max-w-md'} mx-auto animate-fade-in`}>
               <div className="bg-white/95 backdrop-blur-xs rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm border border-emerald-100/70 space-y-6">
-                <div className="flex items-center justify-between gap-3 border-b border-gray-100 pb-4">
-                  <h2 className={`text-xl ${viewMode === 'desktop' ? 'md:text-3xl' : 'text-xl'} font-bold text-[#154c2e] tracking-tight`}>
-                    {lang === 'TH' ? 'ข่าวประชาสัมพันธ์และกิจกรรม' : 'News & Activities'}
-                  </h2>
-                  <button
-                    onClick={() => setActiveTab('home')}
-                    className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
-                  >
-                    <span>←</span>
-                    <span>{lang === 'TH' ? 'หน้าหลัก' : 'Home'}</span>
-                  </button>
+                <div className={`flex flex-col ${viewMode === 'desktop' ? 'md:flex-row md:items-center justify-between' : ''} gap-3 border-b border-gray-100 pb-4`}>
+                  <div className="min-w-0">
+                    <h2 className={`text-lg ${viewMode === 'desktop' ? 'md:text-3xl' : 'text-lg'} font-bold text-[#154c2e] tracking-tight flex items-center gap-2 leading-snug`}>
+                      <Calendar size={viewMode === 'desktop' ? 26 : 20} className="shrink-0" />
+                      <span>{lang === 'TH' ? 'ข่าวประชาสัมพันธ์และกิจกรรม' : 'News & Activities'}</span>
+                    </h2>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1 leading-relaxed">
+                      {lang === 'TH'
+                        ? `รวมนิทรรศการ กิจกรรม และการประกวดทั้งหมด ${cardsData.length} รายการ · แตะเพื่อดูรายละเอียด`
+                        : `${cardsData.length} exhibitions, contests & events · Tap for full details`}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => setActiveTab('home')}
+                      className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
+                    >
+                      <span>←</span>
+                      <span>{lang === 'TH' ? 'หน้าหลัก' : 'Home'}</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* รายการกิจกรรมสไตล์ Editorial Feed */}
-                <div className={`grid grid-cols-1 ${viewMode === 'desktop' ? 'md:grid-cols-2 gap-x-8 gap-y-10' : 'gap-8'}`}>
+                {/* รายการกิจกรรมสไตล์การ์ด Grid เดียวกับหน้าร้านค้า */}
+                <div
+                  className={
+                    viewMode === 'desktop'
+                      ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5 md:gap-5'
+                      : 'grid grid-cols-2 gap-3'
+                  }
+                >
                   {cardsData.map((item) => (
                     <article
                       key={item.id}
                       onClick={() => openDetailPage(item)}
-                      className="flex flex-col cursor-pointer group border-b border-gray-100 pb-7 last:border-b-0"
+                      className="bg-white rounded-2xl overflow-hidden border border-emerald-100/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer group hover:-translate-y-1"
                     >
-                      <div className="w-full overflow-hidden rounded-xl bg-gray-50/70 border border-gray-100 flex items-center justify-center">
+                      <div className="relative aspect-[3/4] bg-emerald-50/40 overflow-hidden">
                         <img
                           src={assetUrl(item.image_url)}
                           alt={lang === 'TH' ? item.title_th : item.title_en}
-                          className={`w-full ${viewMode === 'desktop' ? 'h-72 object-contain bg-white' : 'h-auto object-contain'} group-hover:scale-[1.02] transition-transform duration-300`}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       </div>
-
-                      <h3 className="mt-4 font-bold text-lg md:text-xl text-[#154c2e] group-hover:text-[#0f3a22] transition leading-snug">
-                        {lang === 'TH' ? item.title_th : item.title_en}
-                      </h3>
-
-                      <div className="mt-3.5 inline-flex items-center gap-3 text-sm font-semibold text-[#154c2e] group-hover:gap-4 transition-all">
-                        <span className="inline-block w-10 h-[2px] bg-[#154c2e] rounded-full" />
-                        <span>Continue reading</span>
+                      <div className="p-2.5 sm:p-3 flex flex-col gap-1 flex-1 justify-between">
+                        <h3 className="font-bold text-xs sm:text-sm text-gray-900 group-hover:text-[#154c2e] transition line-clamp-2 leading-snug">
+                          {lang === 'TH' ? item.title_th : item.title_en}
+                        </h3>
+                        <p className="text-[10.5px] sm:text-xs text-gray-500 line-clamp-1">
+                          {lang === 'TH' ? item.location_info_th : item.location_info_en}
+                        </p>
                       </div>
                     </article>
                   ))}
@@ -752,55 +972,64 @@ export default function Home() {
               </article>
             </div>
           ) : activeTab === 'shop' ? (
-            /* หน้าร้านค้าและผังโซนร้านค้า */
-            <div className={`px-3 sm:px-4 py-4 md:py-8 ${viewMode === 'desktop' ? 'max-w-5xl' : 'max-w-md'} mx-auto space-y-6 animate-fade-in`}>
-              <div className="bg-white/95 backdrop-blur-xs rounded-3xl p-5 sm:p-8 shadow-sm border border-emerald-100/70 space-y-6">
-                <div className="flex items-center justify-between gap-3 border-b border-gray-100 pb-4">
-                  <div>
-                    <h2 className={`text-xl ${viewMode === 'desktop' ? 'md:text-3xl' : 'text-xl'} font-bold text-[#154c2e]`}>
-                      {lang === 'TH' ? 'ผังโซนร้านค้าและกิจกรรมนิสิต' : 'Shops & Student Zone Maps'}
+            /* หน้าร้านค้า: รวมโปสเตอร์ร้านค้านิสิตทั้งหมด (ไม่มีภาพแผนที่แล้ว) */
+            <div className={`px-3 sm:px-4 py-4 md:py-8 ${viewMode === 'desktop' ? 'max-w-6xl' : 'max-w-md'} mx-auto space-y-5 animate-fade-in`}>
+              <div className="bg-white/95 backdrop-blur-xs rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm border border-emerald-100/70 space-y-6">
+                <div className={`flex flex-col ${viewMode === 'desktop' ? 'md:flex-row md:items-center justify-between' : ''} gap-3 border-b border-gray-100 pb-4`}>
+                  <div className="min-w-0">
+                    <h2 className={`text-lg ${viewMode === 'desktop' ? 'md:text-3xl' : 'text-lg'} font-bold text-[#154c2e] flex items-center gap-2 leading-snug`}>
+                      <ShoppingBag size={viewMode === 'desktop' ? 26 : 20} className="shrink-0" />
+                      <span>{lang === 'TH' ? 'ร้านค้านิสิต & ของอร่อยในงาน' : 'Student Shops & Fair Food'}</span>
                     </h2>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {lang === 'TH' ? 'งานเกษตรแฟร์นนทรีอีสาน ประจำปี 2569 มก. ฉกส.' : 'Nontri Isan Kaset Fair 2026, KU CSC'}
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1 leading-relaxed">
+                      {lang === 'TH'
+                        ? `รวมร้านค้าผู้ประกอบการหน้าใหม่วัยใส ${ALL_STUDENT_SHOPS.length} ร้าน · แตะที่ภาพเพื่อขยายดูเมนูและราคา`
+                        : `${ALL_STUDENT_SHOPS.length} student shops · Tap any poster to zoom in`}
                     </p>
                   </div>
-                  <button
-                    onClick={() => setActiveTab('home')}
-                    className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
-                  >
-                    <span>←</span>
-                    <span>{lang === 'TH' ? 'หน้าหลัก' : 'Home'}</span>
-                  </button>
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => setActiveTab('home')}
+                      className="text-xs md:text-sm text-[#154c2e] font-semibold bg-emerald-50 px-3.5 py-1.5 rounded-full hover:bg-emerald-100 transition cursor-pointer border border-emerald-200 whitespace-nowrap shrink-0 inline-flex items-center gap-1"
+                    >
+                      <span>←</span>
+                      <span>{lang === 'TH' ? 'หน้าหลัก' : 'Home'}</span>
+                    </button>
+                  </div>
                 </div>
 
-                <div className="space-y-8">
-                  <div className="space-y-3">
-                    <h3 className="text-lg font-bold text-[#154c2e]">
-                      {lang === 'TH' ? '1. ผังร้านค้าทั้งหมด (เกษตรแฟร์นนทรีอีสาน 2569)' : '1. Overall Shops Map (2026)'}
-                    </h3>
-                    <div className="rounded-2xl overflow-hidden border border-gray-100 bg-white">
-                      <img
-                        src={assetUrl('/maps/zone-shops-2026.jpg')}
-                        alt="ผังร้านค้า เกษตรแฟร์นนทรีอีสาน 2569"
-                        className="w-full h-auto object-contain cursor-zoom-in"
-                        onClick={() => window.open(assetUrl('/maps/zone-shops-2026.jpg'), '_blank')}
-                      />
+                {/* แกลเลอรีโปสเตอร์ร้านค้านิสิตทั้งหมด 31 ร้าน */}
+                <div
+                  className={
+                    viewMode === 'desktop'
+                      ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5 md:gap-5'
+                      : 'grid grid-cols-2 gap-3'
+                  }
+                >
+                  {ALL_STUDENT_SHOPS.map((shop, idx) => (
+                    <div
+                      key={shop.id}
+                      onClick={() => setSelectedShopIdx(idx)}
+                      className="bg-white rounded-2xl overflow-hidden border border-emerald-100/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer group hover:-translate-y-1"
+                    >
+                      <div className="relative aspect-[3/4] bg-emerald-50/40 overflow-hidden">
+                        <img
+                          src={assetUrl(shop.image)}
+                          alt={lang === 'TH' ? shop.name_th : shop.name_en}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="p-2.5 sm:p-3 flex flex-col gap-0.5">
+                        <h3 className="font-bold text-xs sm:text-sm text-gray-900 group-hover:text-[#154c2e] transition line-clamp-1">
+                          {lang === 'TH' ? shop.name_th : shop.name_en}
+                        </h3>
+                        <p className="text-[10.5px] sm:text-xs text-gray-500 line-clamp-1">
+                          {lang === 'TH' ? shop.tag_th : shop.tag_en}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="space-y-3 pt-4 border-t border-gray-100">
-                    <h3 className="text-lg font-bold text-[#154c2e]">
-                      {lang === 'TH' ? '2. ผังโซนร้านค้านิสิตและเวที Happy University' : '2. Student Shops & Happy University Zone'}
-                    </h3>
-                    <div className="rounded-2xl overflow-hidden border border-gray-100 bg-white">
-                      <img
-                        src={assetUrl('/maps/zone-student-shops-2026.jpg')}
-                        alt="ผังโซนร้านค้านิสิต"
-                        className="w-full h-auto object-contain cursor-zoom-in"
-                        onClick={() => window.open(assetUrl('/maps/zone-student-shops-2026.jpg'), '_blank')}
-                      />
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -1007,8 +1236,25 @@ export default function Home() {
                   </div>
                 ) : null}
 
-                {/* บน Mobile (หรือหน้าจอเล็ก): สไลเดอร์ภาพเลื่อนโปร่งใสเฉพาะ 4 ไฮไลต์หลัก พร้อมจุด 4 จุด */}
-                <div className={`relative w-full group py-1 ${viewMode === 'desktop' ? 'md:hidden' : 'block'}`}>
+                {/* บน Mobile (หรือหน้าจอเล็ก): สไลเดอร์ภาพเลื่อนโปร่งใสเฉพาะ 4 ไฮไลต์หลัก ปัดนิ้วซ้าย-ขวาได้ */}
+                <div
+                  className={`relative w-full group py-1 touch-pan-y ${viewMode === 'desktop' ? 'md:hidden' : 'block'}`}
+                  onTouchStart={(e) => {
+                    slideTouchStartX.current = e.touches[0].clientX;
+                  }}
+                  onTouchEnd={(e) => {
+                    if (slideTouchStartX.current === null) return;
+                    const dx = e.changedTouches[0].clientX - slideTouchStartX.current;
+                    slideTouchStartX.current = null;
+                    if (Math.abs(dx) > 40) {
+                      setCurrentSlide((prev) =>
+                        dx < 0
+                          ? (prev + 1) % highlightCards.length
+                          : (prev - 1 + highlightCards.length) % highlightCards.length
+                      );
+                    }
+                  }}
+                >
                   {/* กรอบแสดงภาพแบบโปร่งใส ไร้ขอบขาว กลมกลืนกับพื้นหลัง */}
                   <div className="relative w-full aspect-[1/1.25] sm:aspect-[1/1.2] max-h-[90vh] flex items-center justify-center">
                     {highlightCards.map((item, idx) => (
@@ -1029,46 +1275,112 @@ export default function Home() {
                     ))}
                   </div>
 
-                  {/* แถบควบคุมด้านล่างรูปภาพ: รวมปุ่ม ❮ [จุด 4 จุด] ❯ ไว้ด้วยกัน ไม่บังรูปภาพ */}
-                  <div className="flex items-center justify-center gap-3 sm:gap-4 mt-3.5">
-                    {/* ปุ่มย้อนกลับ ❮ */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCurrentSlide((prev) => (prev - 1 + highlightCards.length) % highlightCards.length);
-                      }}
-                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#154c2e]/10 hover:bg-[#154c2e] text-[#154c2e] hover:text-white flex items-center justify-center transition cursor-pointer text-xs sm:text-sm font-bold border border-[#154c2e]/20 active:scale-95 shadow-2xs"
-                      title="ภาพก่อนหน้า"
-                    >
-                      ❮
-                    </button>
-
-                    {/* จุด Dot Indicators 4 จุด */}
-                    <div className="flex items-center gap-2">
-                      {highlightCards.map((_, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setCurrentSlide(idx)}
-                          className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${idx === currentSlide
-                            ? 'w-7 bg-[#154c2e] shadow-xs'
-                            : 'w-2.5 bg-[#154c2e]/25 hover:bg-[#154c2e]/50'
-                            }`}
-                        />
-                      ))}
-                    </div>
-
-                    {/* ปุ่มถัดไป ❯ */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCurrentSlide((prev) => (prev + 1) % highlightCards.length);
-                      }}
-                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#154c2e]/10 hover:bg-[#154c2e] text-[#154c2e] hover:text-white flex items-center justify-center transition cursor-pointer text-xs sm:text-sm font-bold border border-[#154c2e]/20 active:scale-95 shadow-2xs"
-                      title="ภาพถัดไป"
-                    >
-                      ❯
-                    </button>
+                  {/* จุด Dot Indicators 4 จุด */}
+                  <div className="flex items-center justify-center gap-2 mt-3.5">
+                    {highlightCards.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentSlide(idx)}
+                        className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${idx === currentSlide
+                          ? 'w-7 bg-[#154c2e] shadow-xs'
+                          : 'w-2.5 bg-[#154c2e]/25 hover:bg-[#154c2e]/50'
+                          }`}
+                      />
+                    ))}
                   </div>
+                </div>
+              </section>
+
+              {/* 3.2 แถบร้านค้าแนะนำ */}
+              <section id="recommended-shops">
+                <div className="pc-section-header flex items-center justify-between mb-3.5 md:mb-4 px-0.5">
+                  <div>
+                    <h2 className="text-base md:text-2xl font-bold text-[#154c2e] tracking-tight flex items-center gap-2">
+                      <ShoppingBag size={viewMode === 'desktop' ? 22 : 18} className="text-[#154c2e] shrink-0" />
+                      <span>{lang === 'TH' ? 'ร้านค้าแนะนำ' : 'Recommended Shops'}</span>
+                    </h2>
+                    <div className="hidden md:block w-12 h-1 bg-[#154c2e] rounded-full mt-1.5" />
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('shop')}
+                    className="text-xs md:text-sm font-semibold text-emerald-800 bg-emerald-50 hover:bg-[#154c2e] hover:text-white px-3.5 py-1.5 rounded-full border border-emerald-200 transition cursor-pointer flex items-center gap-1 shrink-0"
+                  >
+                    <span>{lang === 'TH' ? 'ดูทั้งหมด' : 'All'}</span>
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+
+                {/* แถบการ์ดร้านค้าแนะนำ: ปัดนิ้ว/ลากเลื่อนแนวนอนไร้ scrollbar บนมือถือ / Grid 3 ช่องบน Desktop */}
+                <div
+                  ref={shopScrollRef}
+                  onMouseDown={(e) => {
+                    const el = shopScrollRef.current;
+                    if (!el) return;
+                    shopDragState.current = {
+                      down: true,
+                      startX: e.pageX - el.offsetLeft,
+                      scrollLeft: el.scrollLeft,
+                      moved: false,
+                    };
+                  }}
+                  onMouseMove={(e) => {
+                    if (!shopDragState.current.down || !shopScrollRef.current) return;
+                    const x = e.pageX - shopScrollRef.current.offsetLeft;
+                    const walk = x - shopDragState.current.startX;
+                    if (Math.abs(walk) > 6) {
+                      shopDragState.current.moved = true;
+                    }
+                    shopScrollRef.current.scrollLeft = shopDragState.current.scrollLeft - walk;
+                  }}
+                  onMouseUp={() => {
+                    shopDragState.current.down = false;
+                  }}
+                  onMouseLeave={() => {
+                    shopDragState.current.down = false;
+                  }}
+                  className={
+                    viewMode === 'desktop'
+                      ? 'no-scrollbar flex md:grid md:grid-cols-3 gap-3.5 md:gap-4 overflow-x-auto md:overflow-visible pb-1 md:pb-0 snap-x snap-mandatory touch-pan-x select-none'
+                      : 'no-scrollbar flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory touch-pan-x select-none cursor-grab active:cursor-grabbing'
+                  }
+                >
+                  {RECOMMENDED_SHOPS.map((shop, idx) => (
+                    <div
+                      key={shop.id}
+                      onClick={() => {
+                        if (shopDragState.current.moved) {
+                          shopDragState.current.moved = false;
+                          return;
+                        }
+                        setSelectedShopIdx(idx);
+                      }}
+                      className={`${
+                        viewMode === 'desktop' ? 'min-w-[225px] md:min-w-0' : 'min-w-[195px] max-w-[205px]'
+                      } snap-start bg-white rounded-2xl overflow-hidden border border-emerald-100/90 shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer group hover:-translate-y-0.5`}
+                    >
+                      <div className="relative aspect-[4/4.6] bg-emerald-50/40 overflow-hidden">
+                        <img
+                          src={assetUrl(shop.image)}
+                          alt={lang === 'TH' ? shop.name_th : shop.name_en}
+                          draggable={false}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="p-3 flex flex-col flex-1 justify-between gap-1.5">
+                        <div>
+                          <div className="text-[10px] font-semibold text-emerald-700">
+                            {lang === 'TH' ? shop.tag_th : shop.tag_en}
+                          </div>
+                          <h3 className="font-bold text-xs sm:text-sm text-gray-900 group-hover:text-[#154c2e] transition line-clamp-1 mt-0.5">
+                            {lang === 'TH' ? shop.name_th : shop.name_en}
+                          </h3>
+                          <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-snug">
+                            {lang === 'TH' ? shop.desc_th : shop.desc_en}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </section>
 
@@ -1078,6 +1390,73 @@ export default function Home() {
             </div>
           )}
         </main>
+
+        {/* Modal Lightbox ดูโปสเตอร์ร้านค้านิสิตแบบเต็มจอ */}
+        {selectedShopIdx !== null && ALL_STUDENT_SHOPS[selectedShopIdx] && (
+          <div
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5"
+            onClick={() => setSelectedShopIdx(null)}
+          >
+            <div
+              className="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-xs sm:text-sm font-bold text-[#154c2e] truncate">
+                    {lang === 'TH'
+                      ? ALL_STUDENT_SHOPS[selectedShopIdx].name_th
+                      : ALL_STUDENT_SHOPS[selectedShopIdx].name_en}
+                  </div>
+                  <div className="text-[11px] text-gray-500">
+                    {selectedShopIdx + 1} / {ALL_STUDENT_SHOPS.length}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedShopIdx(null)}
+                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 cursor-pointer shrink-0"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-auto bg-gray-50 p-2 sm:p-3 flex items-center justify-center">
+                <img
+                  src={assetUrl(ALL_STUDENT_SHOPS[selectedShopIdx].image)}
+                  alt={ALL_STUDENT_SHOPS[selectedShopIdx].name_th}
+                  className="w-full h-auto max-h-[68vh] object-contain rounded-xl"
+                />
+              </div>
+              <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between gap-2 bg-white">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() =>
+                      setSelectedShopIdx((prev) => (prev - 1 + ALL_STUDENT_SHOPS.length) % ALL_STUDENT_SHOPS.length)
+                    }
+                    className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-xs font-semibold text-gray-700 cursor-pointer"
+                  >
+                    ← {lang === 'TH' ? 'ก่อนหน้า' : 'Prev'}
+                  </button>
+                  <button
+                    onClick={() => setSelectedShopIdx((prev) => (prev + 1) % ALL_STUDENT_SHOPS.length)}
+                    className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-xs font-semibold text-gray-700 cursor-pointer"
+                  >
+                    {lang === 'TH' ? 'ถัดไป' : 'Next'} →
+                  </button>
+                </div>
+                <button
+                  onClick={() => {
+                    setSelectedShopIdx(null);
+                    setActiveTab('map');
+                  }}
+                  className="px-3.5 py-1.5 rounded-full bg-[#154c2e] hover:bg-[#0f3a22] text-white text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <MapPin size={13} />
+                  <span>{lang === 'TH' ? 'ดูบนแผนที่' : 'Map'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* =====================
             4. Footer สีเขียวเข้ม มก.

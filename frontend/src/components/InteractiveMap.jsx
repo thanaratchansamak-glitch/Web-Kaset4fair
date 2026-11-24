@@ -16,8 +16,13 @@ import {
 } from 'lucide-react';
 import {
   CAMPUS_CENTER,
+  EXHIBITION_BOOTHS,
+  EXHIBITION_ZONE_BOUNDS,
+  EXTRA_SHOP_STRIPS,
   MAP_LOCATIONS,
   ROAD_CLOSURES,
+  STUDENT_BOOTHS,
+  STUDENT_ZONE_BOUNDS,
 } from '../data/mapLocations';
 
 export default function InteractiveMap({ lang, assetUrl, viewMode = 'desktop', onBackHome }) {
@@ -45,6 +50,7 @@ export default function InteractiveMap({ lang, assetUrl, viewMode = 'desktop', o
 
   const eventLocs = MAP_LOCATIONS.filter((l) => l.category === 'event');
   const studentLocs = MAP_LOCATIONS.filter((l) => l.category === 'student');
+  const parkingLocs = MAP_LOCATIONS.filter((l) => l.category === 'parking');
 
   const filteredLocations =
     filterCat === 'all'
@@ -77,21 +83,120 @@ export default function InteractiveMap({ lang, assetUrl, viewMode = 'desktop', o
     streetLayer.addTo(map);
     tileLayerRef.current = streetLayer;
 
+    // กรอบพื้นที่โซนนิทรรศการวิชาการ (จุดที่ 1–14)
+    L.polygon(EXHIBITION_ZONE_BOUNDS, {
+      color: '#15803d',
+      weight: 2,
+      dashArray: '6 4',
+      fillColor: '#4b5320',
+      fillOpacity: 0.28,
+    }).addTo(map);
+
+    // กล่องอาคาร/เต็นท์แต่ละจุดตามผังแสดงนิทรรศการ
+    EXHIBITION_BOOTHS.forEach((booth) => {
+      const poly = L.polygon(booth.coords, {
+        color: booth.color,
+        weight: 1.5,
+        fillColor: booth.fillColor,
+        fillOpacity: 0.92,
+      }).addTo(map);
+
+      const targetLoc = MAP_LOCATIONS.find((l) => l.id === booth.locId);
+      if (targetLoc) {
+        poly.on('click', () => {
+          setSelectedLoc(targetLoc);
+          map.flyTo([targetLoc.lat, targetLoc.lng], 19, { duration: 0.4 });
+          map.once('moveend', () => markersRef.current[targetLoc.id]?.openPopup());
+        });
+      }
+    });
+
+    // กรอบพื้นที่โซนนิสิต / Happy University
+    L.polygon(STUDENT_ZONE_BOUNDS, {
+      color: '#d97706',
+      weight: 2,
+      dashArray: '6 4',
+      fillColor: '#166534',
+      fillOpacity: 0.22,
+    }).addTo(map);
+
+    // กล่องอาคาร/เต็นท์ในโซนนิสิต
+    STUDENT_BOOTHS.forEach((booth) => {
+      const poly = L.polygon(booth.coords, {
+        color: booth.color,
+        weight: 1.5,
+        fillColor: booth.fillColor,
+        fillOpacity: 0.92,
+      }).addTo(map);
+
+      const targetLoc = MAP_LOCATIONS.find((l) => l.id === booth.locId);
+      if (targetLoc) {
+        poly.on('click', () => {
+          setSelectedLoc(targetLoc);
+          map.flyTo([targetLoc.lat, targetLoc.lng], 18, { duration: 0.4 });
+          map.once('moveend', () => markersRef.current[targetLoc.id]?.openPopup());
+        });
+      }
+    });
+
+    // กล่องแถวร้านค้าริมถนน
+    EXTRA_SHOP_STRIPS.forEach((strip) => {
+      const poly = L.polygon(strip.coords, {
+        color: strip.color,
+        weight: 1.5,
+        fillColor: strip.fillColor,
+        fillOpacity: 0.9,
+      }).addTo(map);
+
+      const targetLoc = MAP_LOCATIONS.find((l) => l.id === strip.locId);
+      if (targetLoc) {
+        poly.on('click', () => {
+          setSelectedLoc(targetLoc);
+          map.flyTo([targetLoc.lat, targetLoc.lng], 18, { duration: 0.4 });
+          map.once('moveend', () => markersRef.current[targetLoc.id]?.openPopup());
+        });
+      }
+    });
+
     MAP_LOCATIONS.forEach((loc) => {
       const isStudent = loc.category === 'student';
+      const isParking = loc.category === 'parking';
       const isShop = [21, 22, 23].includes(loc.number);
-      const bg = isShop ? '#ec4899' : isStudent ? '#15803d' : '#ca8a04';
+      const isFun = loc.number === 24;
+      const isCeremony = [25, 26].includes(loc.number);
+      const bg = isParking
+        ? '#2563eb'
+        : isCeremony
+          ? '#0284c7'
+          : isFun
+            ? '#9333ea'
+            : isShop
+              ? '#ec4899'
+              : isStudent
+                ? '#15803d'
+                : '#ca8a04';
       const icon = L.divIcon({
         className: 'k4f-custom-marker',
-        html: `<div style="width:24px;height:24px;border-radius:9999px;background:${bg};color:#fff;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;">${loc.number}</div>`,
+        html: `<div style="width:24px;height:24px;border-radius:9999px;background:${bg};color:#fff;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:${isParking ? '12px' : '11px'};">${loc.number}</div>`,
         iconSize: [24, 24],
         iconAnchor: [12, 12],
       });
 
-      const accent = isShop ? '#db2777' : isStudent ? '#15803d' : '#a16207';
+      const accent = isParking
+        ? '#1d4ed8'
+        : isCeremony
+          ? '#0369a1'
+          : isFun
+            ? '#7e22ce'
+            : isShop
+              ? '#db2777'
+              : isStudent
+                ? '#15803d'
+                : '#a16207';
       const popupContent = () => {
         const th = langRef.current === 'TH';
-        return `<div style="font-family:inherit;font-size:12px;font-weight:700;color:${accent};">${loc.number}. ${th ? loc.name_th : loc.name_en}</div><div style="font-size:11px;color:#4b5563;margin-top:2px;max-width:240px;">${th ? loc.detail_th : loc.detail_en}</div>`;
+        const prefix = isParking ? '🅿️ ' : `${loc.number}. `;
+        return `<div style="font-family:inherit;font-size:12px;font-weight:700;color:${accent};">${prefix}${th ? loc.name_th : loc.name_en}</div><div style="font-size:11px;color:#4b5563;margin-top:2px;max-width:240px;">${th ? loc.detail_th : loc.detail_en}</div>`;
       };
       const popupOpts = { autoPan: false, offset: [0, -8] };
 
@@ -230,11 +335,17 @@ export default function InteractiveMap({ lang, assetUrl, viewMode = 'desktop', o
   const renderBadge = (loc) => (
     <span
       className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[11px] font-bold shrink-0 ${
-        [21, 22, 23].includes(loc.number)
-          ? 'bg-pink-500'
-          : loc.category === 'student'
-            ? 'bg-emerald-700'
-            : 'bg-yellow-600'
+        loc.category === 'parking'
+          ? 'bg-blue-600'
+          : [25, 26].includes(loc.number)
+            ? 'bg-sky-600'
+            : loc.number === 24
+              ? 'bg-purple-600'
+              : [21, 22, 23].includes(loc.number)
+                ? 'bg-pink-500'
+                : loc.category === 'student'
+                  ? 'bg-emerald-700'
+                  : 'bg-yellow-600'
       }`}
     >
       {loc.number}
@@ -327,6 +438,7 @@ export default function InteractiveMap({ lang, assetUrl, viewMode = 'desktop', o
                 { id: 'all', th: `ทั้งหมด (${MAP_LOCATIONS.length})`, en: `All (${MAP_LOCATIONS.length})` },
                 { id: 'event', th: `โซนนิทรรศการ (${eventLocs.length})`, en: `Exhibition (${eventLocs.length})` },
                 { id: 'student', th: `โซนนิสิต (${studentLocs.length})`, en: `Student Zone (${studentLocs.length})` },
+                { id: 'parking', th: `ที่จอดรถ (${parkingLocs.length})`, en: `Parking (${parkingLocs.length})` },
               ].map((cat) => (
                 <button
                   key={cat.id}
@@ -377,6 +489,7 @@ export default function InteractiveMap({ lang, assetUrl, viewMode = 'desktop', o
             {[
               { key: 'event', labelTh: `โซนนิทรรศการ (${eventLocs.length})`, labelEn: `Exhibition (${eventLocs.length})`, items: eventLocs },
               { key: 'student', labelTh: `โซนนิสิต Happy University (${studentLocs.length})`, labelEn: `Student Zone (${studentLocs.length})`, items: studentLocs },
+              { key: 'parking', labelTh: `ที่จอดรถ (${parkingLocs.length})`, labelEn: `Parking (${parkingLocs.length})`, items: parkingLocs },
             ].map((grp) => (
               <div key={grp.key} className="rounded-xl overflow-hidden border border-emerald-100/80 bg-white">
                 <button
@@ -550,8 +663,8 @@ export default function InteractiveMap({ lang, assetUrl, viewMode = 'desktop', o
 
       <p className="text-[11px] sm:text-xs text-gray-500 leading-relaxed">
         {lang === 'TH'
-          ? `โซนนิทรรศการ ${eventLocs.length} จุด · โซนนิสิต ${studentLocs.length} จุด`
-          : `${eventLocs.length} exhibition points · ${studentLocs.length} student zone points`}
+          ? `โซนนิทรรศการ/กิจกรรม ${eventLocs.length} จุด · โซนนิสิต ${studentLocs.length} จุด · ที่จอดรถ ${parkingLocs.length} จุด`
+          : `${eventLocs.length} exhibition/activity points · ${studentLocs.length} student zone points · ${parkingLocs.length} parking lots`}
       </p>
 
       {/* Modal ดูผังงานฉบับเต็ม 3 รูป */}
