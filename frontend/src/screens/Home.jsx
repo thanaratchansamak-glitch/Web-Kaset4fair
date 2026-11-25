@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../screens_css/Home.css';
 import { ALL_EVENTS, BANNER_EVENT, OPEN_HOUSE_EVENT, EXHIBITION_DETAIL_EVENT } from '../data/eventsData';
 import { RECOMMENDED_SHOPS, ALL_STUDENT_SHOPS } from '../data/recommendedShops';
+import { SPONSORS } from '../data/sponsorsData';
 import InteractiveMap from '../components/InteractiveMap';
 import {
   Search,
@@ -96,6 +97,8 @@ export default function Home() {
   const [currentBanner, setCurrentBanner] = useState(0);
   // State สำหรับ Lightbox ดูภาพโปสเตอร์ร้านค้านิสิตแบบเต็มจอ
   const [selectedShopIdx, setSelectedShopIdx] = useState(null);
+  // State สำหรับขยายดูโลโก้ผู้สนับสนุน
+  const [selectedSponsor, setSelectedSponsor] = useState(null);
 
   const heroBanners = [
     {
@@ -246,15 +249,15 @@ export default function Home() {
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-[14px] sm:text-[15px] md:text-[17px] font-extrabold tracking-tight leading-tight bg-gradient-to-r from-[#0d3820] via-[#154c2e] to-[#257345] bg-clip-text text-transparent drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] truncate">
+              <span className="text-[14.5px] sm:text-[15.5px] md:text-[17.5px] font-bold tracking-normal leading-tight text-[#154c2e] truncate">
                 {lang === 'TH' ? (
-                  <>เกษตรแฟร์ <span className="text-[#d97706] font-black">นนทรีอีสาน</span></>
+                  <>เกษตรแฟร์ <span className="text-[#b45309] font-bold">นนทรีอีสาน</span></>
                 ) : (
-                  <>Kaset Fair <span className="text-[#d97706] font-black">Nontri Isan</span></>
+                  <>Kaset Fair <span className="text-[#b45309] font-bold">Nontri Isan</span></>
                 )}
               </span>
-              <span className="text-[9px] sm:text-[10px] md:text-[11px] font-semibold text-[#154c2e]/70 tracking-wider uppercase">
-                {lang === 'TH' ? 'ครั้งที่ 20 มก. ฉกส.' : '20th KU CSC'}
+              <span className="text-[10px] sm:text-[10.5px] md:text-[11px] font-medium text-[#154c2e]/75">
+                {lang === 'TH' ? 'ครั้งที่ 20 · มก. ฉกส.' : '20th · KU CSC'}
               </span>
             </div>
           </div>
@@ -1020,12 +1023,15 @@ export default function Home() {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       </div>
-                      <div className="p-2.5 sm:p-3 flex flex-col gap-0.5">
+                      <div className="p-2.5 sm:p-3 flex flex-col flex-1 gap-1">
+                        <div className="text-[10px] font-semibold text-emerald-700 line-clamp-1">
+                          {lang === 'TH' ? shop.tag_th : shop.tag_en}
+                        </div>
                         <h3 className="font-bold text-xs sm:text-sm text-gray-900 group-hover:text-[#154c2e] transition line-clamp-1">
                           {lang === 'TH' ? shop.name_th : shop.name_en}
                         </h3>
-                        <p className="text-[10.5px] sm:text-xs text-gray-500 line-clamp-1">
-                          {lang === 'TH' ? shop.tag_th : shop.tag_en}
+                        <p className="text-[10.5px] sm:text-xs text-gray-500 line-clamp-2 leading-snug">
+                          {lang === 'TH' ? shop.desc_th : shop.desc_en}
                         </p>
                       </div>
                     </div>
@@ -1384,8 +1390,40 @@ export default function Home() {
                 </div>
               </section>
 
-              {/* 3.3 พื้นที่ว่างสำหรับใส่ไอเดียหรือฟีเจอร์ใหม่ในอนาคต */}
-              <div className="py-2" />
+              {/* 3.3 ผู้สนับสนุนการจัดงาน (Official Sponsors) เหนือ Footer หน้าแรก */}
+              <section id="sponsors" className="pt-1 md:pt-2">
+                <div className="flex items-center gap-3 mb-3.5 md:mb-4 px-0.5">
+                  <div className="h-[1px] flex-1 bg-emerald-900/15" />
+                  <h2 className="text-xs sm:text-sm md:text-base font-bold text-[#154c2e] tracking-wide uppercase">
+                    {lang === 'TH' ? 'ผู้สนับสนุนการจัดงาน' : 'Official Sponsors'}
+                  </h2>
+                  <div className="h-[1px] flex-1 bg-emerald-900/15" />
+                </div>
+
+                <div
+                  className={
+                    viewMode === 'desktop'
+                      ? 'grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4'
+                      : 'grid grid-cols-3 gap-2.5'
+                  }
+                >
+                  {SPONSORS.map((sp) => (
+                    <div
+                      key={sp.id}
+                      onClick={() => setSelectedSponsor(sp)}
+                      title={lang === 'TH' ? sp.name_th : sp.name_en}
+                      className="bg-white rounded-2xl border border-emerald-100/90 shadow-xs hover:shadow-md transition-all duration-300 p-2.5 sm:p-3.5 aspect-[4/3] flex items-center justify-center cursor-pointer group hover:-translate-y-0.5"
+                    >
+                      <img
+                        src={assetUrl(sp.logo)}
+                        alt={lang === 'TH' ? sp.name_th : sp.name_en}
+                        loading="lazy"
+                        className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </section>
 
             </div>
           )}
@@ -1423,36 +1461,52 @@ export default function Home() {
                 <img
                   src={assetUrl(ALL_STUDENT_SHOPS[selectedShopIdx].image)}
                   alt={ALL_STUDENT_SHOPS[selectedShopIdx].name_th}
-                  className="w-full h-auto max-h-[68vh] object-contain rounded-xl"
+                  className="w-full h-auto max-h-[60vh] object-contain rounded-xl"
                 />
               </div>
-              <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between gap-2 bg-white">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() =>
-                      setSelectedShopIdx((prev) => (prev - 1 + ALL_STUDENT_SHOPS.length) % ALL_STUDENT_SHOPS.length)
-                    }
-                    className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-xs font-semibold text-gray-700 cursor-pointer"
-                  >
-                    ← {lang === 'TH' ? 'ก่อนหน้า' : 'Prev'}
-                  </button>
-                  <button
-                    onClick={() => setSelectedShopIdx((prev) => (prev + 1) % ALL_STUDENT_SHOPS.length)}
-                    className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-xs font-semibold text-gray-700 cursor-pointer"
-                  >
-                    {lang === 'TH' ? 'ถัดไป' : 'Next'} →
-                  </button>
+              <div className="px-4 py-2.5 bg-emerald-50/70 border-t border-emerald-100 space-y-0.5">
+                <div className="text-[11px] font-bold text-emerald-800">
+                  {lang === 'TH'
+                    ? ALL_STUDENT_SHOPS[selectedShopIdx].tag_th
+                    : ALL_STUDENT_SHOPS[selectedShopIdx].tag_en}
+                </div>
+                <p className="text-xs text-gray-700 leading-relaxed">
+                  {lang === 'TH'
+                    ? ALL_STUDENT_SHOPS[selectedShopIdx].desc_th
+                    : ALL_STUDENT_SHOPS[selectedShopIdx].desc_en}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal ขยายดูโลโก้ผู้สนับสนุน */}
+        {selectedSponsor && (
+          <div
+            className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4"
+            onClick={() => setSelectedSponsor(null)}
+          >
+            <div
+              className="bg-white rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-2">
+                <div className="text-xs sm:text-sm font-bold text-[#154c2e] truncate">
+                  {lang === 'TH' ? selectedSponsor.name_th : selectedSponsor.name_en}
                 </div>
                 <button
-                  onClick={() => {
-                    setSelectedShopIdx(null);
-                    setActiveTab('map');
-                  }}
-                  className="px-3.5 py-1.5 rounded-full bg-[#154c2e] hover:bg-[#0f3a22] text-white text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+                  onClick={() => setSelectedSponsor(null)}
+                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 cursor-pointer shrink-0"
                 >
-                  <MapPin size={13} />
-                  <span>{lang === 'TH' ? 'ดูบนแผนที่' : 'Map'}</span>
+                  <X size={16} />
                 </button>
+              </div>
+              <div className="p-6 bg-white flex items-center justify-center">
+                <img
+                  src={assetUrl(selectedSponsor.logo)}
+                  alt={selectedSponsor.name_th}
+                  className="w-full h-auto max-h-[60vh] object-contain"
+                />
               </div>
             </div>
           </div>

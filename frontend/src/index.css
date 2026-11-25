@@ -1,3 +1,32 @@
-body {
-  font-family: 'Prompt', sans-serif;
+:root {
+  --font-body: 'Anuphan', 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading: 'IBM Plex Sans Thai', 'Anuphan', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea,
+.leaflet-container {
+  font-family: var(--font-body) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+nav button,
+.pc-nav-item {
+  font-family: var(--font-heading) !important;
+  letter-spacing: -0.01em;
+}
+
+p,
+li {
+  line-height: 1.65;
 }

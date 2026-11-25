@@ -8,13 +8,23 @@
     <link rel="icon" type="image/png" href="/ku-logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Anuphan', 'IBM Plex Sans Thai', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+              heading: ['IBM Plex Sans Thai', 'Anuphan', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
   </head>
-  <body class="bg-gray-200 font-['Prompt',sans-serif]">
+  <body class="bg-gray-200 antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
-
-
