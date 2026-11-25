@@ -1316,7 +1316,7 @@ export default function Home() {
                   </button>
                 </div>
 
-                {/* แถบการ์ดร้านค้าแนะนำ: ปัดนิ้ว/ลากเลื่อนแนวนอนไร้ scrollbar บนมือถือ / Grid 3 ช่องบน Desktop */}
+                {/* แถบการ์ดร้านค้าแนะนำ: เลื่อนแนวนอนบนมือถือ / Grid 6 ช่องบน Desktop กะทัดรัด สัดส่วนสวยงาม */}
                 <div
                   ref={shopScrollRef}
                   onMouseDown={(e) => {
@@ -1346,8 +1346,8 @@ export default function Home() {
                   }}
                   className={
                     viewMode === 'desktop'
-                      ? 'no-scrollbar flex md:grid md:grid-cols-3 gap-3.5 md:gap-4 overflow-x-auto md:overflow-visible pb-1 md:pb-0 snap-x snap-mandatory touch-pan-x select-none'
-                      : 'no-scrollbar flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory touch-pan-x select-none cursor-grab active:cursor-grabbing'
+                      ? 'no-scrollbar grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 select-none'
+                      : 'no-scrollbar flex gap-2.5 overflow-x-auto pb-1 snap-x snap-mandatory touch-pan-x select-none cursor-grab active:cursor-grabbing'
                   }
                 >
                   {RECOMMENDED_SHOPS.map((shop, idx) => (
@@ -1361,26 +1361,26 @@ export default function Home() {
                         setSelectedShopIdx(idx);
                       }}
                       className={`${
-                        viewMode === 'desktop' ? 'min-w-[225px] md:min-w-0' : 'min-w-[195px] max-w-[205px]'
-                      } snap-start bg-white rounded-2xl overflow-hidden border border-emerald-100/90 shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer group hover:-translate-y-0.5`}
+                        viewMode === 'desktop' ? 'w-full' : 'min-w-[155px] max-w-[165px]'
+                      } snap-start bg-white rounded-xl overflow-hidden border border-emerald-100/90 shadow-2xs hover:shadow-md transition-all duration-300 flex flex-col cursor-pointer group hover:-translate-y-0.5`}
                     >
-                      <div className="relative aspect-[4/4.6] bg-emerald-50/40 overflow-hidden">
+                      <div className="relative aspect-[3/3.8] bg-emerald-50/40 overflow-hidden">
                         <img
                           src={assetUrl(shop.image)}
                           alt={lang === 'TH' ? shop.name_th : shop.name_en}
                           draggable={false}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
+                        <div className="absolute top-1.5 left-1.5 bg-black/60 backdrop-blur-xs text-white text-[9.5px] font-medium px-1.5 py-0.5 rounded-md">
+                          {lang === 'TH' ? shop.tag_th : shop.tag_en}
+                        </div>
                       </div>
-                      <div className="p-3 flex flex-col flex-1 justify-between gap-1.5">
+                      <div className="p-2 sm:p-2.5 flex flex-col flex-1 justify-between gap-1">
                         <div>
-                          <div className="text-[10px] font-semibold text-emerald-700">
-                            {lang === 'TH' ? shop.tag_th : shop.tag_en}
-                          </div>
-                          <h3 className="font-bold text-xs sm:text-sm text-gray-900 group-hover:text-[#154c2e] transition line-clamp-1 mt-0.5">
+                          <h3 className="font-bold text-xs text-gray-900 group-hover:text-[#154c2e] transition line-clamp-1">
                             {lang === 'TH' ? shop.name_th : shop.name_en}
                           </h3>
-                          <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-snug">
+                          <p className="text-[10.5px] text-gray-500 mt-0.5 line-clamp-1 leading-snug">
                             {lang === 'TH' ? shop.desc_th : shop.desc_en}
                           </p>
                         </div>

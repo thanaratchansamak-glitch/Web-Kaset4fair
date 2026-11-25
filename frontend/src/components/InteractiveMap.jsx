@@ -435,18 +435,18 @@ export default function InteractiveMap({ lang, assetUrl, viewMode = 'desktop', o
           <div className="mt-2 bg-white rounded-2xl shadow-lg border border-emerald-100 p-3 space-y-2.5 animate-fade-in">
             <div className="flex flex-wrap gap-1.5">
               {[
-                { id: 'all', th: `ทั้งหมด (${MAP_LOCATIONS.length})`, en: `All (${MAP_LOCATIONS.length})` },
-                { id: 'event', th: `โซนนิทรรศการ (${eventLocs.length})`, en: `Exhibition (${eventLocs.length})` },
-                { id: 'student', th: `โซนนิสิต (${studentLocs.length})`, en: `Student Zone (${studentLocs.length})` },
-                { id: 'parking', th: `ที่จอดรถ (${parkingLocs.length})`, en: `Parking (${parkingLocs.length})` },
+                { id: 'all', th: `ทั้งหมด (${MAP_LOCATIONS.length})`, en: `All (${MAP_LOCATIONS.length})`, activeCls: 'bg-[#154c2e] text-white border-[#154c2e]' },
+                { id: 'event', th: `โซนนิทรรศการ (${eventLocs.length})`, en: `Exhibition (${eventLocs.length})`, activeCls: 'bg-emerald-700 text-white border-emerald-700' },
+                { id: 'student', th: `โซนนิสิต (${studentLocs.length})`, en: `Student Zone (${studentLocs.length})`, activeCls: 'bg-amber-500 text-white border-amber-500' },
+                { id: 'parking', th: `ที่จอดรถ (${parkingLocs.length})`, en: `Parking (${parkingLocs.length})`, activeCls: 'bg-blue-600 text-white border-blue-600' },
               ].map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setFilterCat(cat.id)}
                   className={`px-3 py-1 rounded-full text-[11px] font-semibold cursor-pointer border transition ${
                     filterCat === cat.id
-                      ? 'bg-[#154c2e] text-white border-[#154c2e]'
-                      : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-emerald-50'
+                      ? cat.activeCls
+                      : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
                   }`}
                 >
                   {lang === 'TH' ? cat.th : cat.en}
@@ -487,14 +487,35 @@ export default function InteractiveMap({ lang, assetUrl, viewMode = 'desktop', o
             </h3>
 
             {[
-              { key: 'event', labelTh: `โซนนิทรรศการ (${eventLocs.length})`, labelEn: `Exhibition (${eventLocs.length})`, items: eventLocs },
-              { key: 'student', labelTh: `โซนนิสิต Happy University (${studentLocs.length})`, labelEn: `Student Zone (${studentLocs.length})`, items: studentLocs },
-              { key: 'parking', labelTh: `ที่จอดรถ (${parkingLocs.length})`, labelEn: `Parking (${parkingLocs.length})`, items: parkingLocs },
+              {
+                key: 'event',
+                labelTh: `โซนนิทรรศการ (${eventLocs.length})`,
+                labelEn: `Exhibition (${eventLocs.length})`,
+                items: eventLocs,
+                headerCls: 'bg-emerald-100/70 hover:bg-emerald-100 text-emerald-900 border-emerald-200',
+                borderCls: 'border-emerald-200/80',
+              },
+              {
+                key: 'student',
+                labelTh: `โซนนิสิต Happy University (${studentLocs.length})`,
+                labelEn: `Student Zone (${studentLocs.length})`,
+                items: studentLocs,
+                headerCls: 'bg-amber-100/80 hover:bg-amber-100 text-amber-950 border-amber-200',
+                borderCls: 'border-amber-200/80',
+              },
+              {
+                key: 'parking',
+                labelTh: `ที่จอดรถ (${parkingLocs.length})`,
+                labelEn: `Parking (${parkingLocs.length})`,
+                items: parkingLocs,
+                headerCls: 'bg-blue-100/80 hover:bg-blue-100 text-blue-950 border-blue-200',
+                borderCls: 'border-blue-200/80',
+              },
             ].map((grp) => (
-              <div key={grp.key} className="rounded-xl overflow-hidden border border-emerald-100/80 bg-white">
+              <div key={grp.key} className={`rounded-xl overflow-hidden border ${grp.borderCls} bg-white`}>
                 <button
                   onClick={() => setOpenGroups((prev) => ({ ...prev, [grp.key]: !prev[grp.key] }))}
-                  className="w-full px-3.5 py-2.5 bg-emerald-100/60 hover:bg-emerald-100 text-left text-xs font-bold text-[#154c2e] flex items-center justify-between cursor-pointer transition"
+                  className={`w-full px-3.5 py-2.5 ${grp.headerCls} text-left text-xs font-bold flex items-center justify-between cursor-pointer transition`}
                 >
                   <span>{lang === 'TH' ? grp.labelTh : grp.labelEn}</span>
                   {openGroups[grp.key] ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
@@ -660,12 +681,6 @@ export default function InteractiveMap({ lang, assetUrl, viewMode = 'desktop', o
           <span>{lang === 'TH' ? 'ดูผังงานฉบับเต็ม (JPG)' : 'View Full Zone Maps (JPG)'}</span>
         </button>
       </div>
-
-      <p className="text-[11px] sm:text-xs text-gray-500 leading-relaxed">
-        {lang === 'TH'
-          ? `โซนนิทรรศการ/กิจกรรม ${eventLocs.length} จุด · โซนนิสิต ${studentLocs.length} จุด · ที่จอดรถ ${parkingLocs.length} จุด`
-          : `${eventLocs.length} exhibition/activity points · ${studentLocs.length} student zone points · ${parkingLocs.length} parking lots`}
-      </p>
 
       {/* Modal ดูผังงานฉบับเต็ม 3 รูป */}
       {showFullMapsModal && (
